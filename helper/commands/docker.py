@@ -147,15 +147,15 @@ def get_verbosity(ctx: click.Context) -> Verbosity:
 def docker(ctx, verbose):
     """Docker management commands."""
     ctx.ensure_object(dict)
-    
+
     # Get verbosity from parent context if it exists, otherwise use the flag value
     parent_verbosity = ctx.obj.get('verbosity', 0) if hasattr(ctx, 'obj') else 0
     verbosity_level = max(verbose, parent_verbosity)
-    
+
     # Initialize verbosity
     verbosity = Verbosity(verbosity=verbosity_level)
     ctx.obj['verbosity'] = verbosity
-    
+
     # Set up logging
     logger = logging.getLogger('docker-helper')
     if verbosity_level >= 3:
@@ -166,7 +166,7 @@ def docker(ctx, verbose):
         logger.setLevel(logging.WARNING)
     else:
         logger.setLevel(logging.ERROR)
-    
+
     logger.debug(f"Docker command group initialized with verbosity level: {verbosity_level}")
 
     verbosity.debug("Initializing Docker command group")
@@ -189,7 +189,7 @@ def ps(ctx, all, format):
     try:
         verbosity.debug(f"Running command: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+
         if result.returncode == 0:
             if format == 'json':
                 # Try to parse and pretty-print JSON output
@@ -277,7 +277,7 @@ def run(ctx, image, name, port, detach, env, volume):
     if image:
         cmd.append(image)
         verbosity.debug(f"Using image: {image}")
-    
+
     # Add any remaining arguments
     if hasattr(ctx, 'args') and ctx.args:
         cmd.extend(ctx.args)
@@ -286,7 +286,7 @@ def run(ctx, image, name, port, detach, env, volume):
     try:
         verbosity.debug(f"Running command: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+
         if result.returncode == 0:
             if result.stdout:
                 click.echo(result.stdout.strip())
@@ -296,12 +296,12 @@ def run(ctx, image, name, port, detach, env, volume):
             verbosity.error(error_msg)
             click.echo(error_msg, err=True)
             ctx.exit(1)
-            
+
     except Exception as e:
         error_msg = f"Failed to run container: {str(e)}"
         verbosity.error(error_msg, exc_info=verbosity.verbosity >= 3)
         click.echo(error_msg, err=True)
-        ctx.exit(1) 
+        ctx.exit(1)
 
 @docker.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.argument('containers', nargs=-1, required=False)
@@ -324,7 +324,7 @@ def rm(ctx, containers, force, volumes):
     all_containers = list(containers)
     if hasattr(ctx, 'args') and ctx.args:
         all_containers.extend(ctx.args)
-    
+
     if not all_containers:
         error_msg = "Error: You must specify at least one container"
         verbosity.error(error_msg)
@@ -337,7 +337,7 @@ def rm(ctx, containers, force, volumes):
     try:
         verbosity.debug(f"Running command: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+
         if result.returncode == 0:
             if result.stdout.strip():
                 click.echo(result.stdout.strip())
@@ -347,12 +347,12 @@ def rm(ctx, containers, force, volumes):
             verbosity.error(error_msg)
             click.echo(error_msg, err=True)
             ctx.exit(1)
-            
+
     except Exception as e:
         error_msg = f"Failed to remove containers: {str(e)}"
         verbosity.error(error_msg, exc_info=verbosity.verbosity >= 3)
         click.echo(error_msg, err=True)
-        ctx.exit(1) 
+        ctx.exit(1)
 
 @docker.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.option('--show-all', '-a', is_flag=True, help='Show all containers (default shows just running)')
@@ -413,17 +413,17 @@ def url(ctx, show_all, http_only):
                     if not port.get('host_port') or not port.get('container_port'):
                         verbosity.debug(f"Skipping incomplete port mapping: {port}")
                         continue
-                        
+
                     verbosity.debug(f"Checking port mapping: {port}")
                     verbosity.debug(f"Container name: {name}, Port: {port['container_port']}")
-                    
+
                     # Handle different port string formats (e.g., '8069/tcp', '0.0.0.0:8080->80/tcp')
                     port_str = port['container_port']
-                    
+
                     # Extract port number and protocol
                     port_num = None
                     protocol = 'tcp'  # default protocol
-                    
+
                     # Handle format like '8069/tcp' or '80/http'
                     if '/' in port_str:
                         port_num, protocol = port_str.split('/', 1)
@@ -436,21 +436,23 @@ def url(ctx, show_all, http_only):
                             port_num = port_mapping
                     else:
                         port_num = port_str
-                    
+
                     # Clean up port number (remove any non-numeric characters)
                     port_num = ''.join(c for c in port_num if c.isdigit())
-                    
+
                     # Map all ports to HTTP URLs
                     if port_num:  # Process all ports regardless of protocol
                         scheme = 'http'
-                        
+
                         # Handle IPv6 addresses (add brackets if needed)
                         host = port['host_ip']
                         if ':' in host and not host.startswith('['):
                             host = f'[{host}]'
-                            
+                            verbosity.info(f"Skipping non-HTTP port: {port['container_port']}")
+                            continue
+
                         url = f"{scheme}://{host}:{port['host_port']}"
-                        
+
                         container_info['urls'].append({
                             'url': url,
                             'port': port_num,
@@ -538,7 +540,7 @@ def rmi(ctx, image, all_tags, force, no_prune):
         images.append(image)
     if hasattr(ctx, 'args') and ctx.args:
         images.extend(ctx.args)
-    
+
     if not images and not all_tags:
         error_msg = "Error: You must specify at least one image"
         verbosity.error(error_msg)
@@ -551,7 +553,7 @@ def rmi(ctx, image, all_tags, force, no_prune):
             verbosity.error(error_msg)
             click.echo(error_msg, err=True)
             ctx.exit(1)
-            
+
         # Get all tags for the specified images
         all_tags_to_remove = []
         for img in images:
@@ -559,30 +561,30 @@ def rmi(ctx, image, all_tags, force, no_prune):
             try:
                 result = subprocess.run(
                     ['docker', 'images', '--format', '{{.Repository}}:{{.Tag}}', img],
-                    capture_output=True, 
+                    capture_output=True,
                     text=True
                 )
-                
+
                 if result.returncode == 0 and result.stdout.strip():
                     tags = [line for line in result.stdout.split('\n') if line]
                     verbosity.debug(f"Found {len(tags)} tags for {img}")
                     all_tags_to_remove.extend(tags)
                 else:
                     verbosity.warning(f"No images found matching '{img}'")
-                    
+
             except Exception as e:
                 verbosity.error(f"Error finding tags for {img}: {str(e)}", exc_info=verbosity.verbosity >= 3)
                 continue
-                
+
         if not all_tags_to_remove:
             error_msg = "No matching images found to remove"
             verbosity.error(error_msg)
             click.echo(error_msg, err=True)
             ctx.exit(1)
-            
+
         cmd.extend(all_tags_to_remove)
         verbosity.info(f"Removing {len(all_tags_to_remove)} image(s) with all tags")
-        
+
     else:
         cmd.extend(images)
         verbosity.info(f"Removing {len(images)} image(s)")
@@ -590,7 +592,7 @@ def rmi(ctx, image, all_tags, force, no_prune):
     try:
         verbosity.debug(f"Running command: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+
         if result.returncode == 0:
             if result.stdout.strip():
                 click.echo(result.stdout.strip())
@@ -601,9 +603,9 @@ def rmi(ctx, image, all_tags, force, no_prune):
             verbosity.error(error_msg)
             click.echo(error_msg, err=True)
             ctx.exit(1)
-            
+
     except Exception as e:
         error_msg = f"Failed to remove images: {str(e)}"
         verbosity.error(error_msg, exc_info=verbosity.verbosity >= 3)
         click.echo(error_msg, err=True)
-        ctx.exit(1) 
+        ctx.exit(1)

@@ -1,7 +1,7 @@
 
 [project]
 name = "helper-cli"
-version = "0.1.10"
+version = "0.1.11"
 description = "Simple system info CLI"
 requires-python = ">=3.8"
 dependencies = ["click"]

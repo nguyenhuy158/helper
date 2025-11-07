@@ -76,9 +76,16 @@ class VerbosityGroup(click.Group):
         
         return ctx
 
-@click.group(cls=VerbosityGroup)
+@click.group(cls=VerbosityGroup, context_settings={
+    'help_option_names': ['-h', '--help'],
+    'token_normalize_func': lambda x: 'helper' if x == 'h' else x
+})
 def cli():
-    """Helper CLI - quick system info"""
+    """Helper CLI - quick system info
+    
+    You can use 'h' as a shortcut for 'helper' command.
+    Example: h docker ps
+    """
     # Set up basic logging
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',

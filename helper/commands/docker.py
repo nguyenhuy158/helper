@@ -179,6 +179,7 @@ def docker(ctx, verbose):
 @click.option('--all-containers', is_flag=True, help='Show all containers (default shows just running)')
 @click.option('--format', '-f', type=click.Choice(['table', 'json'], case_sensitive=False),
               default='table', help='Output format')
+@click.help_option('--help', '-h')
 @click.pass_context
 def ps(ctx, all, format):
     """List containers."""

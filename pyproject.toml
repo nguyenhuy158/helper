@@ -1,7 +1,7 @@
 
 [project]
 name = "helper-cli"
-version = "0.1.18"
+version = "0.1.19"
 description = "Simple system info CLI"
 readme = "README.md"
 requires-python = ">=3.8"

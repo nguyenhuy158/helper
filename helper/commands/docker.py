@@ -141,30 +141,33 @@ def get_verbosity(ctx: click.Context) -> Verbosity:
     verbosity.info(f"Verbosity level set to {verbose}")
     return verbosity
 
-@click.group(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
+@click.group()
+@click.option('-v', '--verbose', count=True, help='Increase verbosity (can be used multiple times)')
 @click.pass_context
-def docker(ctx):
+def docker(ctx, verbose):
     """Docker management commands."""
-    # Parse verbosity from args
-    verbose = 0
-    remaining_args = []
-    i = 0
-    while i < len(ctx.args):
-        arg = ctx.args[i]
-        if arg in ('-v', '--verbose'):
-            if arg == '--verbose':
-                verbose += 1
-            else:
-                # Count number of 'v's in -v, -vv, -vvv, etc.
-                verbose += arg.count('v')
-            # Remove the processed flag
-            ctx.args.pop(i)
-        else:
-            i += 1
+    ctx.ensure_object(dict)
+    
+    # Get verbosity from parent context if it exists, otherwise use the flag value
+    parent_verbosity = ctx.obj.get('verbosity', 0) if hasattr(ctx, 'obj') else 0
+    verbosity_level = max(verbose, parent_verbosity)
     
     # Initialize verbosity
-    verbosity = Verbosity(verbosity=verbose)
-    ctx.obj = {'verbosity': verbosity, 'args': ctx.args}
+    verbosity = Verbosity(verbosity=verbosity_level)
+    ctx.obj['verbosity'] = verbosity
+    
+    # Set up logging
+    logger = logging.getLogger('docker-helper')
+    if verbosity_level >= 3:
+        logger.setLevel(logging.DEBUG)
+    elif verbosity_level == 2:
+        logger.setLevel(logging.INFO)
+    elif verbosity_level == 1:
+        logger.setLevel(logging.WARNING)
+    else:
+        logger.setLevel(logging.ERROR)
+    
+    logger.debug(f"Docker command group initialized with verbosity level: {verbosity_level}")
 
     verbosity.debug("Initializing Docker command group")
     if not check_docker(verbosity):

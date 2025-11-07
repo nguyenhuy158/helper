@@ -1,0 +1,8 @@
+
+[project]
+name = "helper-cli"
+version = "0.1.0"
+dependencies = ["click"]
+
+[project.scripts]
+helper = "helper.main:cli"

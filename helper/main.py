@@ -1,5 +1,5 @@
 import click
-from .commands import internal_ip, public_ip, arch
+from .commands import internal_ip, public_ip, arch, nixos
 
 @click.group()
 def cli():
@@ -10,6 +10,7 @@ def cli():
 cli.add_command(internal_ip.internal_ip)
 cli.add_command(public_ip.public_ip)
 cli.add_command(arch.arch)
+cli.add_command(nixos.nixos, name="nixos")
 
 @cli.command()
 @click.pass_context
@@ -21,6 +22,8 @@ def all(ctx):
     ctx.invoke(public_ip.public_ip)
     click.echo("\n=== Architecture ===")
     ctx.invoke(arch.arch)
+    click.echo("\n=== NixOS ===")
+    ctx.invoke(nixos.nixos, 'version')
 
 if __name__ == "__main__":
     cli()

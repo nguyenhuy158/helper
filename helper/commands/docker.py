@@ -12,6 +12,7 @@ import sys
 from typing import Dict, List
 
 import click
+from helper import __version__
 
 # Configure logging
 logging.basicConfig(
@@ -194,9 +195,7 @@ def get_verbosity(ctx: click.Context) -> Verbosity:
 )
 @click.pass_context
 def docker(ctx, verbose):
-    """Docker management commands.
-    
-    Version: 0.1.19
+    """Docker management commands (v{}).
     
     This command provides various Docker management subcommands including:
     - ps: List containers
@@ -206,7 +205,7 @@ def docker(ctx, verbose):
     - url: Show containers with their HTTP/HTTPS URLs
     
     Use --help with any subcommand for more information.
-    """
+    """.format(__version__)
     ctx.ensure_object(dict)
 
     # Get verbosity from parent context if it exists, otherwise use the flag value

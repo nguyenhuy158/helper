@@ -1,8 +1,9 @@
 import platform
 import socket
 import shutil
-from ..utils import run_cmd
 import click
+from helper import __version__
+from helper.utils import run_cmd
 
 def get_internal_ip():
     """Get the internal IP address based on the operating system."""
@@ -25,10 +26,10 @@ def get_internal_ip():
 def internal_ip():
     """Show local/internal IP address.
     
-    Version: 0.1.19
+    Version: {}
     
     Displays the internal IP address of the current machine.
     The command automatically detects the operating system and uses the
     appropriate method to retrieve the IP address.
-    """
+    """.format(__version__)
     get_internal_ip()

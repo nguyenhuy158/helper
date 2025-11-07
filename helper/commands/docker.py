@@ -2,10 +2,57 @@ import click
 import subprocess
 import json
 import re
-from typing import Dict, List, Tuple
+import logging
+import sys
+from typing import Dict, List, Tuple, Optional, Any
 
-def get_container_ports(container_id: str) -> List[Dict]:
+# Configure logging
+logging.basicConfig(
+    level=logging.WARNING,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    stream=sys.stderr
+)
+logger = logging.getLogger('docker-helper')
+
+class Verbosity:
+    """Handle verbosity levels for logging."""
+    def __init__(self, verbosity: int = 0):
+        self.verbosity = verbosity
+        self.set_level()
+    
+    def set_level(self):
+        """Set logging level based on verbosity."""
+        if self.verbosity >= 3:
+            logger.setLevel(logging.DEBUG)
+        elif self.verbosity == 2:
+            logger.setLevel(logging.INFO)
+        elif self.verbosity == 1:
+            logger.setLevel(logging.WARNING)
+        else:
+            logger.setLevel(logging.ERROR)
+    
+    def debug(self, msg: str, *args, **kwargs):
+        """Log debug message if verbosity >= 3."""
+        if self.verbosity >= 3:
+            logger.debug(msg, *args, **kwargs)
+    
+    def info(self, msg: str, *args, **kwargs):
+        """Log info message if verbosity >= 2."""
+        if self.verbosity >= 2:
+            logger.info(msg, *args, **kwargs)
+    
+    def warning(self, msg: str, *args, **kwargs):
+        """Log warning message if verbosity >= 1."""
+        if self.verbosity >= 1:
+            logger.warning(msg, *args, **kwargs)
+    
+    def error(self, msg: str, *args, **kwargs):
+        """Log error message regardless of verbosity."""
+        logger.error(msg, *args, **kwargs)
+
+def get_container_ports(container_id: str, verbosity: Verbosity) -> List[Dict]:
     """Get exposed ports and IPs for a container."""
+    verbosity.debug(f"Getting ports for container {container_id}")
     try:
         result = subprocess.run(
             ['docker', 'inspect', '--format', 
@@ -19,38 +66,62 @@ def get_container_ports(container_id: str) -> List[Dict]:
         )
         
         if result.returncode != 0:
+            verbosity.error(f"Failed to get container info: {result.stderr}")
             return []
             
         ports = []
-        if result.stdout.strip():
-            for mapping in result.stdout.strip().split(';'):
+        raw_output = result.stdout.strip()
+        verbosity.debug(f"Raw port mappings: {raw_output}")
+        
+        if raw_output:
+            for mapping in raw_output.split(';'):
                 if not mapping:
                     continue
                 try:
                     container_port, host_ip, host_port = mapping.split('|')
+                    verbosity.debug(f"Processing mapping: container={container_port}, host_ip={host_ip}, host_port={host_port}")
+                    
                     if container_port and host_port:
-                        ports.append({
+                        port_info = {
                             'container_port': container_port.split('/')[0],  # Remove /tcp or /udp
                             'host_ip': host_ip if host_ip not in ('0.0.0.0', '') else 'localhost',
                             'host_port': host_port
-                        })
-                except ValueError:
+                        }
+                        verbosity.info(f"Added port mapping: {port_info}")
+                        ports.append(port_info)
+                    else:
+                        verbosity.debug(f"Skipping incomplete mapping: {mapping}")
+                except ValueError as e:
+                    verbosity.warning(f"Failed to parse mapping '{mapping}': {e}")
                     continue
+        verbosity.debug(f"Final port mappings: {ports}")
         return ports
-    except Exception:
+    except Exception as e:
+        verbosity.error(f"Unexpected error in get_container_ports: {str(e)}", exc_info=verbosity.verbosity >= 3)
         return []
 
-def check_docker():
+def check_docker(verbosity: Verbosity) -> bool:
     """Check if Docker is installed and running."""
+    verbosity.info("Checking if Docker is installed and running...")
     try:
         result = subprocess.run(['docker', 'info'], 
                               capture_output=True, 
                               text=True)
-        return result.returncode == 0
+        
+        verbosity.debug(f"Docker info command output:\n{result.stdout}")
+        
+        if result.returncode != 0:
+            verbosity.error(f"Docker is not running or not accessible. Error: {result.stderr}")
+            return False
+            
+        verbosity.info("Docker is running and accessible")
+        return True
+        
     except FileNotFoundError:
+        verbosity.error("Docker command not found. Is Docker installed?")
         return False
     except Exception as e:
-        click.echo(f"Error checking Docker: {e}", err=True)
+        verbosity.error(f"Unexpected error checking Docker: {str(e)}", exc_info=verbosity.verbosity >= 3)
         return False
 
 def format_output(output, output_format='table'):
@@ -62,11 +133,26 @@ def format_output(output, output_format='table'):
             return output
     return output
 
+def get_verbosity(ctx: click.Context) -> Verbosity:
+    """Get verbosity level from context."""
+    # Count the number of 'v's in the --verbose flag
+    verbose = ctx.params.get('verbose', 0)
+    verbosity = Verbosity(verbosity=verbose)
+    verbosity.info(f"Verbosity level set to {verbose}")
+    return verbosity
+
 @click.group()
+@click.option('-v', '--verbose', count=True, help="Increase verbosity (can be used multiple times)")
 @click.pass_context
-def docker(ctx):
+def docker(ctx, verbose):
     """Docker management commands."""
-    if not check_docker():
+    # Store verbosity in context for subcommands
+    ctx.ensure_object(dict)
+    verbosity = Verbosity(verbosity=verbose)
+    ctx.obj['verbosity'] = verbosity
+    
+    verbosity.debug("Initializing Docker command group")
+    if not check_docker(verbosity):
         click.echo("Error: Docker is not installed or not running. Please start Docker and try again.", err=True)
         ctx.exit(1)
 
@@ -172,29 +258,45 @@ def rm(containers, force, volumes):
 @docker.command()
 @click.option('--show-all', '-a', is_flag=True, help='Show all containers (default shows just running)')
 @click.option('--http-only', is_flag=True, help='Show only containers with HTTP/HTTPS ports')
-def url(show_all, http_only):
+@click.pass_context
+def url(ctx, show_all, http_only):
     """Show containers with their HTTP/HTTPS URLs."""
+    verbosity = ctx.obj['verbosity']
+    verbosity.info(f"Starting url command with show_all={show_all}, http_only={http_only}")
+    
     try:
         # Get all containers
         cmd = ['docker', 'ps', '--format', '{{.ID}}|{{.Names}}|{{.Status}}|{{.Ports}}']
         if show_all:
             cmd.append('-a')
             
+        verbosity.debug(f"Running command: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
+        
         if result.returncode != 0:
-            click.echo(f"Error listing containers: {result.stderr}", err=True)
+            error_msg = f"Error listing containers: {result.stderr}"
+            verbosity.error(error_msg)
+            click.echo(error_msg, err=True)
             return
+            
+        verbosity.debug(f"Command output: {result.stdout}")
             
         running_containers = []
         stopped_containers = []
         
-        for line in result.stdout.strip().split('\n'):
+        container_lines = result.stdout.strip().split('\n')
+        verbosity.info(f"Found {len(container_lines)} container(s)")
+        
+        for line in container_lines:
             if not line.strip():
+                verbosity.debug("Skipping empty line")
                 continue
                 
             try:
+                verbosity.debug(f"Processing container line: {line}")
                 container_id, name, status, ports = line.split('|', 3)
                 is_running = 'Up' in status
+                verbosity.info(f"Container: ID={container_id[:12]}, Name={name}, Status={status}, Running={is_running}")
                 
                 # Get container details
                 container_info = {
@@ -205,17 +307,32 @@ def url(show_all, http_only):
                 }
                 
                 # Get exposed ports and their mappings
-                port_mappings = get_container_ports(container_id)
+                port_mappings = get_container_ports(container_id, verbosity)
+                verbosity.debug(f"Found {len(port_mappings)} port mappings for {name}")
+                
                 for port in port_mappings:
                     if port['host_port'] and port['container_port']:
+                        verbosity.debug(f"Checking port mapping: {port}")
+                        
                         # Check if it's HTTP/HTTPS port (common ports)
-                        if (port['container_port'] in ['80', '443', '8080', '8443', '3000', '5000', '8000', '8888'] or
-                            any(p in port['container_port'] for p in ['80/', '443/', '8080/', '8443/'])):
+                        http_ports = ['80', '443', '8080', '8443', '3000', '5000', '8000', '8888']
+                        is_http_port = (
+                            port['container_port'] in http_ports or
+                            any(p in port['container_port'] for p in ['80/', '443/', '8080/', '8443/'])
+                        )
+                        
+                        if is_http_port:
                             scheme = 'https' if port['container_port'].startswith('443') else 'http'
+                            url = f"{scheme}://{port['host_ip']}:{port['host_port']}"
+                            port_num = port['container_port'].split('/')[0]
+                            
                             container_info['urls'].append({
-                                'url': f"{scheme}://{port['host_ip']}:{port['host_port']}",
-                                'port': port['container_port'].split('/')[0]
+                                'url': url,
+                                'port': port_num
                             })
+                            verbosity.info(f"Added URL for {name}: {url} (port {port_num})")
+                        else:
+                            verbosity.debug(f"Skipping non-HTTP port: {port['container_port']}")
                 
                 # If http_only is True and no HTTP URLs, skip this container
                 if http_only and not container_info['urls']:
@@ -234,25 +351,43 @@ def url(show_all, http_only):
         if running_containers:
             click.secho("\n🚀 Running Containers:", fg='green', bold=True)
             for container in running_containers:
+                verbosity.debug(f"Displaying running container: {container['name']}")
                 click.echo(f"\n{click.style('●', fg='green')} {click.style(container['name'], bold=True)} ({container['id']})")
+                
                 if container['urls']:
+                    verbosity.info(f"Found {len(container['urls'])} URLs for {container['name']}")
                     for url_info in container['urls']:
+                        verbosity.debug(f"Displaying URL: {url_info['url']}")
                         click.echo(f"   {click.style('→', fg='blue')} {click.style(url_info['url'], fg='blue', underline=True)}")
+                else:
+                    verbosity.debug(f"No URLs found for {container['name']}")
         
         # Display stopped containers
         if stopped_containers and (show_all or not http_only):
             click.secho("\n⏸️  Stopped Containers:", fg='yellow', bold=True)
             for container in stopped_containers:
+                verbosity.debug(f"Displaying stopped container: {container['name']}")
                 click.echo(f"\n{click.style('●', fg='yellow')} {click.style(container['name'], dim=True)} ({container['id']})")
+                
                 if container['urls']:
+                    verbosity.info(f"Found {len(container['urls'])} URLs for stopped container {container['name']}")
                     for url_info in container['urls']:
+                        verbosity.debug(f"Displaying URL for stopped container: {url_info['url']}")
                         click.echo(f"   {click.style('→', fg='blue')} {click.style(url_info['url'], fg='blue', underline=True, dim=True)}")
+                else:
+                    verbosity.debug(f"No URLs found for stopped container {container['name']}")")
         
         if not running_containers and not stopped_containers:
-            click.echo("No containers found.")
+            msg = "No containers found."
+            verbosity.info(msg)
+            click.echo(msg)
+        else:
+            verbosity.info(f"Displayed {len(running_containers)} running and {len(stopped_containers)} stopped containers")
             
     except Exception as e:
-        click.echo(f"Error: {str(e)}", err=True)
+        error_msg = f"Error in url command: {str(e)}"
+        verbosity.error(error_msg, exc_info=verbosity.verbosity >= 3)
+        click.echo(error_msg, err=True)
 
 @docker.command()
 @click.argument('image')

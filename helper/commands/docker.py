@@ -176,7 +176,8 @@ def docker(ctx, verbose):
 
 @docker.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.option('--all', '-a', is_flag=True, help='Show all containers (default shows just running)')
-@click.option('--format', type=click.Choice(['table', 'json'], case_sensitive=False),
+@click.option('--all-containers', is_flag=True, help='Show all containers (default shows just running)')
+@click.option('--format', '-f', type=click.Choice(['table', 'json'], case_sensitive=False),
               default='table', help='Output format')
 @click.pass_context
 def ps(ctx, all, format):
@@ -356,7 +357,7 @@ def rm(ctx, containers, force, volumes):
 
 @docker.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.option('--show-all', '-a', is_flag=True, help='Show all containers (default shows just running)')
-@click.option('--http-only', is_flag=True, help='Show only containers with HTTP/HTTPS ports')
+@click.option('--http-only', '-h', is_flag=True, help='Show only containers with HTTP/HTTPS ports')
 @click.pass_context
 def url(ctx, show_all, http_only):
     """Show containers with their HTTP/HTTPS URLs."""

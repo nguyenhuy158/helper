@@ -2,7 +2,7 @@ import click
 import logging
 import sys
 import subprocess
-from .commands import internal_ip, public_ip, arch, nixos, docker, speed, system_info
+from .commands import internal_ip, public_ip, arch, nixos, docker, speed, system_info, venv
 
 class VerbosityCommand(click.Command):
     def parse_args(self, ctx, args):
@@ -104,6 +104,7 @@ cli.add_command(speed.speed, name="sp")
 cli.add_command(system_info.system_info, name="system-info")
 cli.add_command(system_info.system_info, name="sysinfo")
 cli.add_command(system_info.system_info, name="si")
+cli.add_command(venv.venv)
 
 @cli.command()
 @click.pass_context

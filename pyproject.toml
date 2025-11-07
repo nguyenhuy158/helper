@@ -5,7 +5,7 @@ version = "0.1.16"
 description = "Simple system info CLI"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "MIT"}
+license = "GPL-3.0-or-later"
 authors = [
     {name = "Huy Nguyen", email = "huy.ntq02@gmail.com"}
 ]

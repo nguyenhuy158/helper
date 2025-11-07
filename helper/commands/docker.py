@@ -194,7 +194,19 @@ def get_verbosity(ctx: click.Context) -> Verbosity:
 )
 @click.pass_context
 def docker(ctx, verbose):
-    """Docker management commands."""
+    """Docker management commands.
+    
+    Version: 0.1.19
+    
+    This command provides various Docker management subcommands including:
+    - ps: List containers
+    - run: Run a command in a new container
+    - rm: Remove one or more containers
+    - rmi: Remove one or more images
+    - url: Show containers with their HTTP/HTTPS URLs
+    
+    Use --help with any subcommand for more information.
+    """
     ctx.ensure_object(dict)
 
     # Get verbosity from parent context if it exists, otherwise use the flag value

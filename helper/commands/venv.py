@@ -92,7 +92,7 @@ def deactivate_virtualenv():
 
 @click.group()
 def venv():
-    """Manage Python virtual environments."""
+    """Manage Python virtual environments (v0.1.19)."""
 
 
 @venv.command()

@@ -23,5 +23,12 @@ def get_internal_ip():
 
 @click.command()
 def internal_ip():
-    """Show local/internal IP"""
+    """Show local/internal IP address.
+    
+    Version: 0.1.19
+    
+    Displays the internal IP address of the current machine.
+    The command automatically detects the operating system and uses the
+    appropriate method to retrieve the IP address.
+    """
     get_internal_ip()

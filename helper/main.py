@@ -2,6 +2,9 @@ import click
 import logging
 import sys
 import subprocess
+
+# Version information
+VERSION = "0.1.19"
 from .commands import (
     internal_ip,
     public_ip,
@@ -96,12 +99,15 @@ class VerbosityGroup(click.Group):
         "token_normalize_func": lambda x: "helper" if x == "h" else x,
     },
 )
+@click.version_option(VERSION, "-V", "--version", message="%(prog)s version %(version)s")
 def cli():
-    """Helper CLI - quick system info
-
+    """Helper CLI - quick system info (v{})
+    
     You can use 'h' as a shortcut for 'helper' command.
     Example: h docker ps
-    """
+    
+    For detailed help on a specific command, use: helper <command> --help
+    """.format(VERSION)
     # Set up basic logging
     logging.basicConfig(
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",

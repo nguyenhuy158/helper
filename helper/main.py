@@ -2,7 +2,7 @@ import click
 import logging
 import sys
 import subprocess
-from .commands import internal_ip, public_ip, arch, nixos, docker, speed
+from .commands import internal_ip, public_ip, arch, nixos, docker, speed, system_info
 
 class VerbosityCommand(click.Command):
     def parse_args(self, ctx, args):
@@ -101,6 +101,9 @@ cli.add_command(nixos.nixos, name="nixos")
 cli.add_command(docker.docker, name="docker")
 cli.add_command(speed.speed, name="speed")
 cli.add_command(speed.speed, name="sp")
+cli.add_command(system_info.system_info, name="system-info")
+cli.add_command(system_info.system_info, name="sysinfo")
+cli.add_command(system_info.system_info, name="si")
 
 @cli.command()
 @click.pass_context
@@ -114,6 +117,8 @@ def all(ctx):
     ctx.invoke(arch.arch)
     click.echo("\n=== NixOS ===")
     ctx.invoke(nixos.nixos, 'version')
+    click.echo("\n=== System Info ===")
+    ctx.invoke(system_info.system_info)
 
 if __name__ == "__main__":
     cli()

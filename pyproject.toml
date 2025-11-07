@@ -20,7 +20,9 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Operating System :: OS Independent",
 ]
-dependencies = ["click"]
+dependencies = [
+    "click>=8.0.0"
+]
 
 [project.scripts]
 helper = "helper.main:cli"

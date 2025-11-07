@@ -410,28 +410,54 @@ def url(ctx, show_all, http_only):
                 verbosity.debug(f"Found {len(port_mappings)} port mappings for {name}")
 
                 for port in port_mappings:
-                    if port['host_port'] and port['container_port']:
-                        verbosity.debug(f"Checking port mapping: {port}")
-
-                        # Check if it's HTTP/HTTPS port (common ports)
-                        http_ports = ['80', '443', '8080', '8443', '3000', '5000', '8000', '8888']
-                        is_http_port = (
-                            port['container_port'] in http_ports or
-                            any(p in port['container_port'] for p in ['80/', '443/', '8080/', '8443/'])
-                        )
-
-                        if is_http_port:
-                            scheme = 'https' if port['container_port'].startswith('443') else 'http'
-                            url = f"{scheme}://{port['host_ip']}:{port['host_port']}"
-                            port_num = port['container_port'].split('/')[0]
-
-                            container_info['urls'].append({
-                                'url': url,
-                                'port': port_num
-                            })
-                            verbosity.info(f"Added URL for {name}: {url} (port {port_num})")
+                    if not port.get('host_port') or not port.get('container_port'):
+                        verbosity.debug(f"Skipping incomplete port mapping: {port}")
+                        continue
+                        
+                    verbosity.debug(f"Checking port mapping: {port}")
+                    verbosity.debug(f"Container name: {name}, Port: {port['container_port']}")
+                    
+                    # Handle different port string formats (e.g., '8069/tcp', '0.0.0.0:8080->80/tcp')
+                    port_str = port['container_port']
+                    
+                    # Extract port number and protocol
+                    port_num = None
+                    protocol = 'tcp'  # default protocol
+                    
+                    # Handle format like '8069/tcp' or '80/http'
+                    if '/' in port_str:
+                        port_num, protocol = port_str.split('/', 1)
+                    # Handle format like '0.0.0.0:8080->80/tcp'
+                    elif '->' in port_str:
+                        _, port_mapping = port_str.split('->', 1)
+                        if '/' in port_mapping:
+                            port_num, protocol = port_mapping.split('/', 1)
                         else:
-                            verbosity.debug(f"Skipping non-HTTP port: {port['container_port']}")
+                            port_num = port_mapping
+                    else:
+                        port_num = port_str
+                    
+                    # Clean up port number (remove any non-numeric characters)
+                    port_num = ''.join(c for c in port_num if c.isdigit())
+                    
+                    # Map all ports to HTTP URLs
+                    if port_num:  # Process all ports regardless of protocol
+                        scheme = 'http'
+                        
+                        # Handle IPv6 addresses (add brackets if needed)
+                        host = port['host_ip']
+                        if ':' in host and not host.startswith('['):
+                            host = f'[{host}]'
+                            
+                        url = f"{scheme}://{host}:{port['host_port']}"
+                        
+                        container_info['urls'].append({
+                            'url': url,
+                            'port': port_num,
+                            'protocol': protocol
+                        })
+                        verbosity.info(f"Added URL for {name}: {url} (port {port_num}/{protocol})")
+                        verbosity.info(f"Added URL for {name}: {url} (port {port_num})")
 
                 # If http_only is True and no HTTP URLs, skip this container
                 if http_only and not container_info['urls']:

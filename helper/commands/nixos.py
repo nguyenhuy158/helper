@@ -57,3 +57,32 @@ def search(package):
             click.echo(f"Error searching for package: {result.stderr}", err=True)
     except Exception as e:
         click.echo(f"Error: {str(e)}", err=True)
+
+@nixos.command()
+@click.option('-f', '--force', is_flag=True, help='Force garbage collection and remove all old generations')
+def clean(force):
+    """Clean Nix store and perform garbage collection."""
+    if not check_nixos():
+        click.echo("Error: This command can only be run on NixOS", err=True)
+        return
+
+    try:
+        click.echo("Running Nix garbage collection...")
+        if force:
+            click.echo("Forcing garbage collection and removing all old generations...")
+            # Remove all old generations of all profiles
+            subprocess.run(['nix-collect-garbage', '-d'], check=True)
+            click.echo("✓ Removed all old generations and ran garbage collection")
+        else:
+            # Regular garbage collection (safe, only removes unreachable paths)
+            subprocess.run(['nix-collect-garbage'], check=True)
+            click.echo("✓ Garbage collection completed")
+        
+        # Show disk space usage after cleanup
+        click.echo("\nDisk space usage after cleanup:")
+        subprocess.run(['nix-store', '--query', '--disk-usage', '/nix/store'])
+        
+    except subprocess.CalledProcessError as e:
+        click.echo(f"Error during cleanup: {e}", err=True)
+    except Exception as e:
+        click.echo(f"Unexpected error: {str(e)}", err=True)

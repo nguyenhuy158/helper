@@ -1,6 +1,7 @@
 from ..utils import run_cmd
 import click
 
+
 @click.command()
 def arch():
     """Show CPU architecture"""

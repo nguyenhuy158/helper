@@ -2,38 +2,48 @@ import click
 import logging
 import sys
 import subprocess
-from .commands import internal_ip, public_ip, arch, nixos, docker, speed, system_info, venv
+from .commands import (
+    internal_ip,
+    public_ip,
+    arch,
+    nixos,
+    docker,
+    speed,
+    system_info,
+    venv,
+)
+
 
 class VerbosityCommand(click.Command):
     def parse_args(self, ctx, args):
         # Initialize verbosity from context if it exists
         ctx.ensure_object(dict)
-        verbose = ctx.obj.get('verbosity', 0)
-        
+        verbose = ctx.obj.get("verbosity", 0)
+
         # Process args for verbosity flags
         new_args = []
         i = 0
         while i < len(args):
             arg = args[i]
-            if arg == '--verbose':
+            if arg == "--verbose":
                 verbose += 1
-            elif arg.startswith('-v'):
-                verbose += arg.count('v')
+            elif arg.startswith("-v"):
+                verbose += arg.count("v")
             else:
                 new_args.append(arg)
             i += 1
-        
+
         # Update verbosity in context
-        ctx.obj['verbosity'] = verbose
-        
+        ctx.obj["verbosity"] = verbose
+
         # Set up logging
         self._setup_logging(verbose)
-        
+
         # Continue with normal argument parsing
         return super().parse_args(ctx, new_args)
-    
+
     def _setup_logging(self, verbose):
-        logger = logging.getLogger('docker-helper')
+        logger = logging.getLogger("docker-helper")
         if verbose >= 3:
             logger.setLevel(logging.DEBUG)
         elif verbose == 2:
@@ -42,30 +52,31 @@ class VerbosityCommand(click.Command):
             logger.setLevel(logging.WARNING)
         else:
             logger.setLevel(logging.ERROR)
+
 
 class VerbosityGroup(click.Group):
     def make_context(self, info_name, args, parent=None, **extra):
         # Pre-process args to find verbosity flags
         verbose = 0
         processed_args = []
-        
+
         for arg in args:
-            if arg == '--verbose':
+            if arg == "--verbose":
                 verbose += 1
-            elif arg.startswith('-v'):
-                verbose += arg.count('v')
+            elif arg.startswith("-v"):
+                verbose += arg.count("v")
             else:
                 processed_args.append(arg)
-        
+
         # Create context with processed args
         ctx = super().make_context(info_name, processed_args, parent=parent, **extra)
-        
+
         # Set verbosity in context
         ctx.ensure_object(dict)
-        ctx.obj['verbosity'] = verbose
-        
+        ctx.obj["verbosity"] = verbose
+
         # Set up logging
-        logger = logging.getLogger('docker-helper')
+        logger = logging.getLogger("docker-helper")
         if verbose >= 3:
             logger.setLevel(logging.DEBUG)
         elif verbose == 2:
@@ -74,24 +85,29 @@ class VerbosityGroup(click.Group):
             logger.setLevel(logging.WARNING)
         else:
             logger.setLevel(logging.ERROR)
-        
+
         return ctx
 
-@click.group(cls=VerbosityGroup, context_settings={
-    'help_option_names': ['-h', '--help'],
-    'token_normalize_func': lambda x: 'helper' if x == 'h' else x
-})
+
+@click.group(
+    cls=VerbosityGroup,
+    context_settings={
+        "help_option_names": ["-h", "--help"],
+        "token_normalize_func": lambda x: "helper" if x == "h" else x,
+    },
+)
 def cli():
     """Helper CLI - quick system info
-    
+
     You can use 'h' as a shortcut for 'helper' command.
     Example: h docker ps
     """
     # Set up basic logging
     logging.basicConfig(
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.ERROR
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        level=logging.ERROR,
     )
+
 
 # Register all commands
 cli.add_command(internal_ip.internal_ip)
@@ -106,6 +122,7 @@ cli.add_command(system_info.system_info, name="sysinfo")
 cli.add_command(system_info.system_info, name="si")
 cli.add_command(venv.venv, name="v")
 
+
 @cli.command()
 @click.pass_context
 def all(ctx):
@@ -117,9 +134,10 @@ def all(ctx):
     click.echo("\n=== Architecture ===")
     ctx.invoke(arch.arch)
     click.echo("\n=== NixOS ===")
-    ctx.invoke(nixos.nixos, 'version')
+    ctx.invoke(nixos.nixos, "version")
     click.echo("\n=== System Info ===")
     ctx.invoke(system_info.system_info)
+
 
 if __name__ == "__main__":
     cli()

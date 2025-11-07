@@ -2,6 +2,7 @@ import click
 import subprocess
 from ..utils import run_cmd
 
+
 def check_speedtest_installed():
     """Check if speedtest-cli is installed."""
     try:
@@ -15,12 +16,9 @@ def check_speedtest_installed():
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
 
+
 @click.command()
-@click.option(
-    "--simple", "-s",
-    is_flag=True,
-    help="Only show basic speed information"
-)
+@click.option("--simple", "-s", is_flag=True, help="Only show basic speed information")
 def speed(simple):
     """Test internet speed using speedtest-cli"""
     if not check_speedtest_installed():
@@ -33,6 +31,7 @@ def speed(simple):
         cmd += " --simple"
 
     run_cmd(cmd)
+
 
 # Add aliases for the command
 speed_test = speed

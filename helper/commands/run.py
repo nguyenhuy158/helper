@@ -10,13 +10,83 @@ from ..snippets import (
 )
 
 
-@click.group(name="run", help="Run predefined command snippets.")
-def run():
-    """Run predefined command snippets."""
-    # No need for pass statement
+@click.group(name="run", help="Run predefined command snippets.", invoke_without_command=True)
+@click.argument('snippet', required=False)
+@click.argument('args', nargs=-1, type=click.UNPROCESSED)
+@click.option('-f', '--force', is_flag=True, help="Skip confirmation prompt")
+@click.pass_context
+def run(ctx, snippet, args, force):
+    """Run predefined command snippets.
+    
+    Examples:
+        # List all snippets
+        h run list
+        
+        # Execute a snippet
+        h run click-odoo /path/to/script.py
+        
+        # Skip confirmation
+        h run --force click-odoo /path/to/script.py
+        h run -f click-odoo /path/to/script.py
+    """
+    # If no subcommand is provided, try to execute the snippet directly
+    if ctx.invoked_subcommand is None:
+        if not snippet:
+            click.echo("Error: No snippet specified. Use 'h run list' to see available snippets.")
+            ctx.exit(1)
+        
+        # Handle the 'list' command directly
+        if snippet == 'list':
+            list_cmd()
+            return
+            
+        # Handle other commands by checking if they're valid snippets
+        snippets = load_snippets()
+        if snippet not in snippets:
+            click.echo(f"Error: Snippet '{snippet}' not found. Use 'h run list' to see available snippets.", err=True)
+            ctx.exit(1)
+            
+        # Execute the snippet
+        _execute_snippet(snippet, args, force)
+        return
+        
+    # If we get here, it means a subcommand was used
+    pass
 
 
-@run.command(name="list")
+def _execute_snippet(name, args, force):
+    """Execute a snippet with the given arguments."""
+    # Convert args to a dict of named parameters
+    kwargs = {}
+    if args:
+        kwargs['file'] = args[0]
+        kwargs['args'] = ' '.join(args[1:]) if len(args) > 1 else ''
+    
+    try:
+        command = get_snippet_command(name, **kwargs)
+        if command is None:
+            click.echo(f"Snippet '{name}' not found. Available snippets:", err=True)
+            list_cmd()
+            sys.exit(1)
+        
+        # Always show the command that will be executed
+        click.echo(f"Command to execute: {click.style(command, fg='yellow', bold=True)}")
+        
+        # Ask for confirmation if not in force mode
+        if not force and not click.confirm('Do you want to run this command?', default=False):
+            click.echo("Command execution cancelled.")
+            return
+            
+        # Run the command
+        subprocess.run(command, shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        click.echo(f"Command failed with return code {e.returncode}", err=True)
+        sys.exit(e.returncode)
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+
 def list_cmd():
     """List all available snippets."""
     snippets = list_snippets()
@@ -28,6 +98,12 @@ def list_cmd():
     click.echo("-" * 50)
     for i, name in enumerate(snippets, 1):
         click.echo(f"{i}. {name}")
+
+
+@run.command(name="list")
+def list_cmd_wrapper():
+    """List all available snippets."""
+    list_cmd()
 
 
 @run.command(name="show")
@@ -110,52 +186,5 @@ def edit_cmd(editor):
         raise click.Abort()
 
 
-@run.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
-@click.argument("name")
-@click.argument("args", nargs=-1, type=click.UNPROCESSED)
-@click.option('-f', '--force', is_flag=True, help="Skip confirmation prompt")
-@click.pass_context
-def exec_cmd(ctx, name, args, force):
-    """Execute a snippet with the given arguments.
-    
-    Example:
-        h run click-odoo /path/to/script.py
-        h run --force click-odoo /path/to/script.py
-        h run -f click-odoo /path/to/script.py
-    
-    Available variables in snippets:
-        {container} - Odoo container name (from ODOO_CONTAINER env var)
-        {db_container} - DB container name (from ODOO_DB_CONTAINER env var)
-        {file} - The first argument after the snippet name
-        {args} - All arguments as a single string
-    """
-    # Convert args to a dict of named parameters
-    kwargs = {}
-    if args:
-        kwargs['file'] = args[0]
-        kwargs['args'] = ' '.join(args[1:]) if len(args) > 1 else ''
-    
-    try:
-        command = get_snippet_command(name, **kwargs)
-        if command is None:
-            click.echo(f"Snippet '{name}' not found. Available snippets:", err=True)
-            list_cmd()
-            ctx.exit(1)
-        
-        # Always show the command that will be executed
-        click.echo(f"Command to execute: {click.style(command, fg='yellow', bold=True)}")
-        
-        # Ask for confirmation if not in force mode
-        if not force and not click.confirm('Do you want to run this command?', default=True):
-            click.echo("Command execution cancelled.")
-            return
-            
-        # Run the command
-        subprocess.run(command, shell=True, check=True)
-    except subprocess.CalledProcessError as e:
-        click.echo(f"Command failed with return code {e.returncode}", err=True)
-        ctx.exit(e.returncode)
-    except Exception as e:
-        click.echo(f"Error: {e}", err=True)
-        ctx.exit(1)
+# exec_cmd has been removed as its functionality is now handled by the main run command
         ctx.exit(1)

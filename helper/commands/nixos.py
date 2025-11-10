@@ -43,7 +43,7 @@ def get_nixos_version():
 
 @click.group()
 def nixos():
-    """NixOS related commands (v0.1.19)."""
+    """NixOS related commands."""
     if not check_nixos():
         click.echo(
             "Warning: Not running on NixOS. Some commands may not work as expected.",

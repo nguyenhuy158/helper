@@ -24,12 +24,17 @@ def get_internal_ip():
 
 @click.command()
 def internal_ip():
-    """Show local/internal IP address.
+    """Display the local/internal IP address.
     
-    Version: {}
+    This command shows the internal (LAN) IP address of your machine.
+    It automatically detects the correct network interface based on your OS.
     
-    Displays the internal IP address of the current machine.
-    The command automatically detects the operating system and uses the
-    appropriate method to retrieve the IP address.
-    """.format(__version__)
-    get_internal_ip()
+    Examples:
+        $ h ip
+        192.168.1.100
+        
+    Note: On multi-homed systems, this shows the primary network interface's IP.
+    """
+    ip = get_internal_ip()
+    if ip:
+        click.echo(ip)

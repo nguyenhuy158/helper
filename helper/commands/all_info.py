@@ -17,10 +17,10 @@ def register_all_command(cli):
         parent = ctx.parent.command
         
         click.echo("=== Internal IP ===")
-        ctx.invoke(parent.get_command(ctx, "internal-ip"))
+        ctx.invoke(parent.get_command(ctx, "ip"))
         
         click.echo("\n=== Public IP ===")
-        ctx.invoke(parent.get_command(ctx, "public-ip"))
+        ctx.invoke(parent.get_command(ctx, "pubip"))
         
         click.echo("\n=== Architecture ===")
         ctx.invoke(parent.get_command(ctx, "arch"))
@@ -28,10 +28,9 @@ def register_all_command(cli):
         # NixOS command doesn't accept arguments, so we'll just run it directly
         click.echo("\n=== NixOS (Skipped) ==="
                  "\nNote: NixOS version check skipped as it requires direct execution"
-                 "\nTo check NixOS version, run: h nixos")
-        # ctx.invoke(parent.get_command(ctx, "nixos"))
+                 "\nTo check NixOS version, run: h nix")
         
         click.echo("\n=== System Info ===")
-        ctx.invoke(parent.get_command(ctx, "system-info"))
+        ctx.invoke(parent.get_command(ctx, "si"))
 
     return all

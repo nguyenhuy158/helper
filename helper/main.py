@@ -47,18 +47,15 @@ def cli():
 
 
 # Register all commands
-cli.add_command(internal_ip.internal_ip)
-cli.add_command(public_ip.public_ip)
-cli.add_command(arch.arch)
-cli.add_command(nixos.nixos, name="nixos")
-cli.add_command(docker.docker, name="docker")
-cli.add_command(speed.speed, name="speed")
+# Keep only short versions of commands where duplicates exist
+cli.add_command(internal_ip.internal_ip, name="ip")
+cli.add_command(public_ip.public_ip, name="pubip")
+cli.add_command(arch.arch, name="arch")
+cli.add_command(nixos.nixos, name="nix")
+cli.add_command(docker.docker, name="d", help="Docker container and image management")
 cli.add_command(speed.speed, name="sp")
-cli.add_command(system_info.system_info, name="system-info")
-cli.add_command(system_info.system_info, name="sysinfo")
 cli.add_command(system_info.system_info, name="si")
 cli.add_command(venv.venv, name="v")
-cli.add_command(file.file(), name="file")
 cli.add_command(file.file(), name="f")
 
 

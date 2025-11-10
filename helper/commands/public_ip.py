@@ -5,13 +5,16 @@ from helper.utils import run_cmd
 
 @click.command()
 def public_ip():
-    """Show public IP address.
+    """Display the public (external) IP address.
     
-    Version: {}
+    This command retrieves and displays your public IP address as seen from the internet.
+    It's useful for checking your current external network identity.
     
-    Retrieves and displays the public IP address of the current machine.
-    Uses https://ifconfig.me as the primary service and falls back to curl
-    if the primary method fails.
-    """.format(__version__)
+    Examples:
+        $ h pubip
+        203.0.113.45
+        
+    Note: Requires an active internet connection. Uses ifconfig.me service by default.
+    """
     cmd = "curl -s ifconfig.me"
     run_cmd(cmd)

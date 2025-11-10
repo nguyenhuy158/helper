@@ -12,6 +12,7 @@ from .commands import (
     speed,
     system_info,
     venv,
+    file,
 )
 
 
@@ -125,6 +126,8 @@ cli.add_command(system_info.system_info, name="system-info")
 cli.add_command(system_info.system_info, name="sysinfo")
 cli.add_command(system_info.system_info, name="si")
 cli.add_command(venv.venv, name="v")
+cli.add_command(file.file(), name="file")
+cli.add_command(file.file(), name="f")
 
 
 @cli.command()

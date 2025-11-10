@@ -113,12 +113,15 @@ def edit_cmd(editor):
 @run.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.argument("name")
 @click.argument("args", nargs=-1, type=click.UNPROCESSED)
+@click.option('-f', '--force', is_flag=True, help="Skip confirmation prompt")
 @click.pass_context
-def exec_cmd(ctx, name, args):
+def exec_cmd(ctx, name, args, force):
     """Execute a snippet with the given arguments.
     
     Example:
         h run click-odoo /path/to/script.py
+        h run --force click-odoo /path/to/script.py
+        h run -f click-odoo /path/to/script.py
     
     Available variables in snippets:
         {container} - Odoo container name (from ODOO_CONTAINER env var)
@@ -139,8 +142,20 @@ def exec_cmd(ctx, name, args):
             list_cmd()
             ctx.exit(1)
         
-        click.echo(f"Running: {command}")
+        # Always show the command that will be executed
+        click.echo(f"Command to execute: {click.style(command, fg='yellow', bold=True)}")
+        
+        # Ask for confirmation if not in force mode
+        if not force and not click.confirm('Do you want to run this command?', default=True):
+            click.echo("Command execution cancelled.")
+            return
+            
+        # Run the command
         subprocess.run(command, shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        click.echo(f"Command failed with return code {e.returncode}", err=True)
+        ctx.exit(e.returncode)
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
         ctx.exit(1)

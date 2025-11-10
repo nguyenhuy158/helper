@@ -18,6 +18,7 @@ from .commands import (
     verbosity,
     all_info,
     env_cmd,
+    run_cmd,
 )
 
 
@@ -64,6 +65,7 @@ cli.add_command(system_info.system_info, name="si")
 cli.add_command(venv.venv, name="v")
 cli.add_command(file.file(), name="f")
 cli.add_command(env_cmd, name="env")
+cli.add_command(run_cmd, name="run")
 
 
 # Register the all command

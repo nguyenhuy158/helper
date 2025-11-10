@@ -2,7 +2,9 @@ import click
 import logging
 import sys
 import subprocess
+from pathlib import Path
 from . import __version__
+from .env_manager import load_env
 from .commands import (
     internal_ip,
     public_ip,
@@ -15,6 +17,7 @@ from .commands import (
     file,
     verbosity,
     all_info,
+    env_cmd,
 )
 
 
@@ -39,6 +42,9 @@ def cli():
     
     For detailed help on a specific command, use: helper <command> --help
     """.format(__version__)
+    # Initialize environment variables
+    load_env()
+    
     # Set up basic logging
     logging.basicConfig(
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -57,6 +63,7 @@ cli.add_command(speed.speed, name="sp")
 cli.add_command(system_info.system_info, name="si")
 cli.add_command(venv.venv, name="v")
 cli.add_command(file.file(), name="f")
+cli.add_command(env_cmd, name="env")
 
 
 # Register the all command

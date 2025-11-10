@@ -1,4 +1,5 @@
 """Environment variable management commands."""
+
 import os
 import click
 from pathlib import Path
@@ -18,18 +19,18 @@ def list_env_cmd():
     if not env_vars:
         click.echo("No environment variables set.")
         return
-    
+
     # Find the maximum key length for alignment
     max_key_len = max(len(str(k)) for k in env_vars.keys())
-    
+
     # Print header
     click.echo("Environment Variables:")
     click.echo("-" * (max_key_len + 40))  # 40 is a rough estimate for value + padding
-    
+
     # Print each variable
     for key, value in sorted(env_vars.items()):
         click.echo(f"{key.ljust(max_key_len)} : {value}")
-    
+
     click.echo()  # Add a newline at the end
 
 
@@ -37,12 +38,12 @@ def list_env_cmd():
 @click.argument("key", required=False)
 def get_env_cmd(key):
     """Get environment variable(s).
-    
+
     If no key is provided, all environment variables will be shown as a table.
     """
     if not key:
         return list_env_cmd()
-        
+
     env_vars = load_env()
     value = env_vars.get(key, "")
     click.echo(f"{key}={value}")
@@ -72,14 +73,31 @@ def unset_env_cmd(key):
         click.echo(f"Variable {key} not found", err=True)
 
 
+@env.command(name="source")
+def source_env_cmd():
+    """Export all environment variables to current shell session.
+
+    Example:
+        eval $(h env source)
+        source <(h env source)
+    """
+    env_vars = load_env()
+    for key, value in env_vars.items():
+        # Escape special characters in the value
+        escaped_value = (
+            value.replace('"', '\\"').replace("`", "\\`").replace("$", "\\$")
+        )
+        click.echo(f'export {key}="{escaped_value}"')
+
+
 def save_env(env_vars):
     """Save environment variables to .env file.
-    
+
     Args:
         env_vars: Dictionary of environment variables to save.
     """
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    
-    with open(ENV_FILE, 'w', encoding='utf-8') as f:
+
+    with open(ENV_FILE, "w", encoding="utf-8") as f:
         for key, value in env_vars.items():
             f.write(f'{key}="{value}"\n')

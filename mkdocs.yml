@@ -1,11 +1,17 @@
 site_name: Helper CLI Docs
-# site_url: https://nguyenhuy158.github.io/helper/helper.html
+site_author: Nguyen Huy
+site_description: Helper CLI Docs
+site_url: https://helper.huycode.click
 repo_url: https://github.com/nguyenhuy158/helper
 # theme: readthedocs
 # theme: material
-theme: mkdocs
-site_author: Nguyen Huy
-site_description: Helper CLI Docs
+theme:
+    # name: mkdocs
+    name: material
+    highlightjs: true
+    hljs_languages:
+        - yaml
+        - rust
 docs_dir: src_docs
 site_dir: docs
 
@@ -16,5 +22,16 @@ markdown_extensions:
     # - toc:
     #       permalink: true
 
+plugins:
+    - minify
+    - rss
+    # - git-authors
+    - search:
+          lang: en
+
 watch:
     - helper
+
+nav:
+    - Home: index.md
+    - About: about.md

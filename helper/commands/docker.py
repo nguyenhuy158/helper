@@ -196,16 +196,16 @@ def get_verbosity(ctx: click.Context) -> Verbosity:
 @click.pass_context
 def docker(ctx, verbose):
     """Docker container and image management.
-    
+
     Manage Docker containers and images with subcommands for common operations.
-    
+
     Subcommands:
       ps    List containers
       run   Run a command in a new container
       rm    Remove one or more containers
       rmi   Remove one or more images
       url   Show containers with their HTTP/HTTPS URLs
-    
+
     Examples:
       h d ps            # List running containers
       h d run nginx     # Run an nginx container
@@ -263,7 +263,10 @@ def docker(ctx, verbose):
     default="table",
     help="Output format",
 )
-@click.help_option("--help", "-h")
+@click.help_option(
+    "-h",
+    "--help",
+)
 @click.pass_context
 def ps(ctx, all_containers, output_format):  # pylint: disable=redefined-builtin
     """List containers."""

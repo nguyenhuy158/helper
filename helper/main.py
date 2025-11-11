@@ -28,24 +28,29 @@ VerbosityGroup = verbosity.VerbosityGroup
 
 
 @click.group(
+    name="helper",
     cls=VerbosityGroup,
     context_settings={
         "help_option_names": ["-h", "--help"],
         "token_normalize_func": lambda x: "helper" if x == "h" else x,
     },
 )
-@click.version_option(__version__, "-V", "--version", message="%(prog)s version %(version)s")
+@click.version_option(
+    __version__, "-V", "--version", message="%(prog)s version %(version)s"
+)
 def cli():
     """Helper CLI - quick system info (v{})
-    
+
     You can use 'h' as a shortcut for 'helper' command.
     Example: h docker ps
-    
+
     For detailed help on a specific command, use: helper <command> --help
-    """.format(__version__)
+    """.format(
+        __version__
+    )
     # Initialize environment variables
     load_env()
-    
+
     # Set up basic logging
     logging.basicConfig(
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",

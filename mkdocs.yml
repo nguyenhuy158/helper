@@ -6,6 +6,8 @@ repo_url: https://github.com/nguyenhuy158/helper
 theme: mkdocs
 site_author: Nguyen Huy
 site_description: Helper CLI Docs
+docs_dir: src_docs
+site_dir: docs
 
 markdown_extensions:
     - attr_list

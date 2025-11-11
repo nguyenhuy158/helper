@@ -5,6 +5,7 @@ description = "Simple system info CLI"
 readme = "README.md"
 requires-python = ">=3.8"
 license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 
 authors = [
     { name = "Huy Nguyen", email = "huy.ntq02@gmail.com" }
@@ -13,7 +14,6 @@ authors = [
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",

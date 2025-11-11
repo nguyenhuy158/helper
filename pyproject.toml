@@ -8,8 +8,6 @@ license = "GPL-3.0-or-later"
 authors = [
     { name = "Huy Nguyen", email = "huy.ntq02@gmail.com" }
 ]
-packages = ["helper"]
-
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -20,7 +18,6 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Operating System :: OS Independent"
 ]
-
 dependencies = [
     "click>=8.0.0",
     "speedtest-cli>=2.1.0"
@@ -34,6 +31,10 @@ Repository = "https://github.com/nguyenhuy158/helper"
 [project.scripts]
 helper = "helper.main:cli"
 h = "helper.main:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["helper*"]
 
 [tool.pdoc]
 modules = ["helper"]

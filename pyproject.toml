@@ -1,17 +1,19 @@
-
 [project]
 name = "helper-cli"
 version = "0.1.29"
 description = "Simple system info CLI"
 readme = "README.md"
 requires-python = ">=3.8"
-license = "GPL-3.0-or-later"
+license = { text = "GPL-3.0-or-later" }
+
 authors = [
-    {name = "Huy Nguyen", email = "huy.ntq02@gmail.com"}
+    { name = "Huy Nguyen", email = "huy.ntq02@gmail.com" }
 ]
+
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -19,7 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Operating System :: OS Independent"
 ]
-documentation = "https://nguyenhuy158.github.io/helper/helper.html"
+
 dependencies = [
     "click>=8.0.0",
     "speedtest-cli>=2.1.0"

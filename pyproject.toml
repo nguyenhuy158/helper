@@ -19,6 +19,13 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Operating System :: OS Independent"
 ]
+documentation = "https://nguyenhuy158.github.io/helper/helper.html"
+
+[project.urls]
+Homepage = "https://github.com/nguyenhuy158/helper"
+Documentation = "https://nguyenhuy158.github.io/helper/helper.html"
+Repository = "https://github.com/nguyenhuy158/helper"
+
 dependencies = [
     "click>=8.0.0",
     "speedtest-cli>=2.1.0"

@@ -6,6 +6,8 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = "GPL-3.0-or-later"
 
+packages = ["helper"]
+
 authors = [
     { name = "Huy Nguyen", email = "huy.ntq02@gmail.com" }
 ]

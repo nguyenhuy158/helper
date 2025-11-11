@@ -20,16 +20,15 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 documentation = "https://nguyenhuy158.github.io/helper/helper.html"
+dependencies = [
+    "click>=8.0.0",
+    "speedtest-cli>=2.1.0"
+]
 
 [project.urls]
 Homepage = "https://github.com/nguyenhuy158/helper"
 Documentation = "https://nguyenhuy158.github.io/helper/helper.html"
 Repository = "https://github.com/nguyenhuy158/helper"
-
-dependencies = [
-    "click>=8.0.0",
-    "speedtest-cli>=2.1.0"
-]
 
 [project.scripts]
 helper = "helper.main:cli"

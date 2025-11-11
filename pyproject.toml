@@ -27,3 +27,8 @@ dependencies = [
 [project.scripts]
 helper = "helper.main:cli"
 h = "helper.main:cli"
+
+[tool.pdoc]
+modules = ["helper"]
+output_dir = "docs"
+docformat = "google"

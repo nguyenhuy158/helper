@@ -1,0 +1,18 @@
+site_name: Helper CLI Docs
+# site_url: https://nguyenhuy158.github.io/helper/helper.html
+repo_url: https://github.com/nguyenhuy158/helper
+# theme: readthedocs
+# theme: material
+theme: mkdocs
+site_author: Nguyen Huy
+site_description: Helper CLI Docs
+
+markdown_extensions:
+    - attr_list
+    - mkdocs-click
+    # - smarty
+    # - toc:
+    #       permalink: true
+
+watch:
+    - helper

@@ -20,12 +20,22 @@ helper [command]
 
 #### Available commands:
 
-| Command       | Description                       | Example              |
-| ------------- | --------------------------------- | -------------------- |
-| `internal-ip` | Show internal IP                  | `helper internal-ip` |
-| `public-ip`   | Show public IP                    | `helper public-ip`   |
-| `cpu-arch`    | Show CPU architecture (arm / amd) | `helper cpu-arch`    |
-| `all`         | Show all info                     | `helper all`         |
+| Command | Description                       | Example              |
+| ------- | --------------------------------- | -------------------- |
+| `ip`    | Show internal IP                  | `helper ip`          |
+| `pubip` | Show public IP                    | `helper pubip`       |
+| `arch`  | Show CPU architecture (arm / amd) | `helper arch`        |
+| `si`    | Show system information           | `helper si`          |
+| `nix`   | Show NixOS information            | `helper nix`         |
+| `d`     | Show Docker information           | `helper d`           |
+| `sp`    | Show speed test results           | `helper sp`          |
+| `v`     | Show virtual environment info     | `helper v`           |
+| `f`     | Show file information             | `helper f`           |
+| `env`   | Show environment variables        | `helper env`         |
+| `run`   | Run command snippets              | `helper run`         |
+| `all`   | Show all info                     | `helper all`         |
+
+Use `-v` for verbose output (e.g., `helper ip -v`).
 
 Each command also prints the shell command it runs to get the result.
 

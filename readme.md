@@ -34,6 +34,7 @@ helper [command]
 | `env`   | Show environment variables        | `helper env`         |
 | `run`   | Run command snippets              | `helper run`         |
 | `kill`  | Kill processes by name or port    | `helper kill <name>` |
+| `disk`  | Show disk usage, mount, and list info | `helper disk usage`  |
 | `all`   | Show all info                     | `helper all`         |
 
 Use `-v` for verbose output (e.g., `helper ip -v`).

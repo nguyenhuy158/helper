@@ -20,6 +20,7 @@ from .commands import (
     env_cmd,
     run_cmd,
     kill,
+    disk,
 )
 
 
@@ -73,6 +74,7 @@ cli.add_command(file.file(), name="f")
 cli.add_command(env_cmd, name="env")
 cli.add_command(run_cmd, name="run")
 cli.add_command(kill.kill, name="kill")
+cli.add_command(disk.disk(), name="disk")
 
 
 # Register the all command

@@ -1,6 +1,6 @@
 APP_NAME = helper-cli
 
-.PHONY: help build publish test-publish test-publish-patch test-publish-minor test-publish-major patch minor major clean all arch d env f ip kill nix pubip run si sp v
+.PHONY: help build publish test-publish test-publish-patch test-publish-minor test-publish-major patch minor major clean push-tags all arch d env f ip kill nix pubip run si sp v
 
 # Default target: show help
 help:
@@ -16,6 +16,7 @@ help:
 	@echo "  minor               - Bump minor version (0.1.0 → 0.2.0)"
 	@echo "  major               - Bump major version (1.0.0 → 2.0.0)"
 	@echo "  clean               - Clean build artifacts"
+	@echo "  push-tags           - Push all git tags to remote"
 	@echo ""
 	@echo "CLI Commands (run with helper):"
 	@echo "  all      - Show all info"
@@ -81,6 +82,9 @@ major:
 
 clean:
 	rm -rf dist build *.egg-info
+
+push-tags:
+	git push --tags origin
 
 # CLI command shortcuts
 all:

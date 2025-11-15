@@ -42,6 +42,39 @@ Use `-v` for verbose output (e.g., `helper ip -v`).
 
 Each command also prints the shell command it runs to get the result.
 
+### 📚 Library Usage
+
+You can import and use helper functions programmatically:
+
+```python
+import helper
+
+# Get disk usage information
+usage = helper.disk.get_usage()
+print(usage)
+
+# Get system information as dict
+info = helper.system_info.get_info()
+print(f"System: {info['system']['system']}")
+print(f"CPU: {info['cpu']['cpu']}")
+
+# Get internal IP
+ip = helper.internal_ip.get_internal_ip()
+print(f"Internal IP: {ip}")
+
+# Get public IP
+pub_ip = helper.public_ip.get_public_ip()
+print(f"Public IP: {pub_ip}")
+
+# Get architecture
+arch = helper.arch.get_arch()
+print(f"Architecture: {arch}")
+
+# Get all info
+all_info = helper.all_info.get_info()
+print(all_info)
+```
+
 ### 🔄 Upgrade
 
 ```bash

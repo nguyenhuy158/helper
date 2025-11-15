@@ -187,99 +187,87 @@ def format_uptime(uptime_str, system):
     return uptime_str
 
 
-@click.command()
-def system_info():
-    """Display system information including CPU, RAM, and disk usage"""
+def get_info():
+    """Get system information as a dictionary."""
     system = platform.system().lower()
     commands = get_os_specific_info()
 
     if not commands:
-        click.echo("Unsupported operating system")
-        return
+        return None
+
+    info = {}
 
     # System Information
-    click.echo("=" * 40 + " System Information " + "=" * 40)
-    click.echo(f"System: {platform.system()} {platform.release()}")
-    click.echo(f"Node Name: {run_command(commands['hostname'])}")
-    click.echo(f"Machine: {platform.machine()}")
-    click.echo(
-        f"Processor: {platform.processor() or run_command(commands['cpu']).strip()}"
-    )
+    info['system'] = {
+        'system': platform.system(),
+        'release': platform.release(),
+        'node': run_command(commands['hostname']),
+        'machine': platform.machine(),
+        'processor': platform.processor() or run_command(commands['cpu']).strip()
+    }
 
     # OS Version
-    click.echo("\n" + "=" * 40 + " OS Version " + "=" * 40)
-    click.echo(run_command(commands["os_version"]))
+    info['os_version'] = run_command(commands["os_version"])
 
     # Uptime
-    click.echo("\n" + "=" * 40 + " Uptime " + "=" * 40)
-    uptime = run_command(commands["uptime"])
-    click.echo(format_uptime(uptime, system))
+    uptime_str = run_command(commands["uptime"])
+    info['uptime'] = format_uptime(uptime_str, system)
 
-    # CPU Information
-    click.echo("\n" + "=" * 40 + " CPU Info " + "=" * 40)
-    cpu_cores = run_command(commands["cpu_cores"]).strip()
-    click.echo(f"CPU Cores: {cpu_cores}")
+    # CPU
+    info['cpu'] = {
+        'cores': run_command(commands["cpu_cores"]).strip(),
+    }
 
     if system == "darwin" or system == "linux":
-        cpu_info = run_command(commands["cpu"]).strip()
-        click.echo(f"CPU: {cpu_info}")
+        info['cpu']['cpu'] = run_command(commands["cpu"]).strip()
 
-        # CPU Usage (simplified for cross-platform)
         if system == "darwin":
-            load_avg = run_command("sysctl -n vm.loadavg").strip()
-            click.echo(f"Load Average: {load_avg}")
+            info['cpu']['load_avg'] = run_command("sysctl -n vm.loadavg").strip()
         elif system == "linux":
-            load_avg = run_command("cat /proc/loadavg").strip()
-            click.echo(f"Load Average: {load_avg}")
+            info['cpu']['load_avg'] = run_command("cat /proc/loadavg").strip()
 
-    # Memory Information
-    click.echo("\n" + "=" * 40 + " Memory Information " + "=" * 40)
+    # Memory
     if system == "darwin":
         mem_info = run_command("vm_stat")
-        click.echo(parse_vm_stat(mem_info))
+        info['memory'] = parse_vm_stat(mem_info)
     elif system == "linux":
         mem_info = run_command("free -b")  # Get bytes for consistent formatting
         lines = mem_info.split("\n")
         if len(lines) > 1:
-            headers = lines[0].split()
             values = lines[1].split()
             if len(values) >= 7:  # For Mem: line
                 total = int(values[1])
                 used = int(values[2])
                 free = int(values[3])
-                click.echo(
-                    f"Total: {format_bytes(total)}\n"
-                    f"Used:  {format_bytes(used)}\n"
-                    f"Free:  {format_bytes(free)}\n"
-                    f"Usage: {used/total*100:.1f}%"
-                )
+                info['memory'] = {
+                    'total': format_bytes(total),
+                    'used': format_bytes(used),
+                    'free': format_bytes(free),
+                    'usage': f"{used/total*100:.1f}%" if total > 0 else "0%"
+                }
     elif system == "windows":
         mem_info = run_command(
             "wmic OS get TotalVisibleMemorySize,FreePhysicalMemory /Value"
         )
         if "TotalVisibleMemorySize" in mem_info and "FreePhysicalMemory" in mem_info:
-            try:
-                total = (
-                    int(mem_info.split("TotalVisibleMemorySize=")[1].split("\n")[0])
-                    * 1024
-                )  # KB to bytes
-                free = (
-                    int(mem_info.split("FreePhysicalMemory=")[1].split("\n")[0]) * 1024
-                )  # KB to bytes
-                used = total - free
-                click.echo(
-                    f"Total: {format_bytes(total)}\n"
-                    f"Used:  {format_bytes(used)}\n"
-                    f"Free:  {format_bytes(free)}\n"
-                    f"Usage: {used/total*100:.1f}%"
-                )
-            except (IndexError, ValueError):
-                click.echo(mem_info)
+            total = (
+                int(mem_info.split("TotalVisibleMemorySize=")[1].split("\n")[0])
+                * 1024
+            )  # KB to bytes
+            free = (
+                int(mem_info.split("FreePhysicalMemory=")[1].split("\n")[0]) * 1024
+            )  # KB to bytes
+            used = total - free
+            info['memory'] = {
+                'total': format_bytes(total),
+                'used': format_bytes(used),
+                'free': format_bytes(free),
+                'usage': f"{used/total*100:.1f}%" if total > 0 else "0%"
+            }
         else:
-            click.echo(mem_info)
+            info['memory'] = mem_info
 
-    # Disk Information
-    click.echo("\n" + "=" * 40 + " Disk Information " + "=" * 40)
+    # Disk
     if system == "windows":
         disks = run_command("wmic logicaldisk get size,freespace,caption")
         if "Caption" in disks:
@@ -309,16 +297,71 @@ def system_info():
                         )
                     except (ValueError, IndexError):
                         continue
-            click.echo("\n".join(result))
+            info['disks'] = "\n".join(result)
         else:
-            click.echo(disks)
+            info['disks'] = disks
     else:
         disks = run_command(
             "df -h"
             if system != "windows"
             else "wmic logicaldisk get size,freespace,caption"
         )
-        click.echo(parse_df_output(disks))
+        info['disks'] = parse_df_output(disks)
+
+    return info
+
+
+@click.command()
+def system_info():
+    """Display system information including CPU, RAM, and disk usage"""
+    info = get_info()
+
+    if not info:
+        click.echo("Unsupported operating system")
+        return
+
+    # System Information
+    click.echo("=" * 40 + " System Information " + "=" * 40)
+    click.echo(f"System: {info['system']['system']} {info['system']['release']}")
+    click.echo(f"Node Name: {info['system']['node']}")
+    click.echo(f"Machine: {info['system']['machine']}")
+    click.echo(
+        f"Processor: {info['system']['processor']}"
+    )
+
+    # OS Version
+    click.echo("\n" + "=" * 40 + " OS Version " + "=" * 40)
+    click.echo(info['os_version'])
+
+    # Uptime
+    click.echo("\n" + "=" * 40 + " Uptime " + "=" * 40)
+    click.echo(info['uptime'])
+
+    # CPU Information
+    click.echo("\n" + "=" * 40 + " CPU Info " + "=" * 40)
+    click.echo(f"CPU Cores: {info['cpu']['cores']}")
+
+    if 'cpu' in info['cpu']:
+        click.echo(f"CPU: {info['cpu']['cpu']}")
+
+    if 'load_avg' in info['cpu']:
+        click.echo(f"Load Average: {info['cpu']['load_avg']}")
+
+    # Memory Information
+    click.echo("\n" + "=" * 40 + " Memory Information " + "=" * 40)
+    if isinstance(info['memory'], dict):
+        click.echo(
+            f"Total: {info['memory']['total']}\n"
+            f"Used:  {info['memory']['used']}\n"
+            f"Free:  {info['memory']['free']}\n"
+            f"Usage: {info['memory']['usage']}"
+        )
+    else:
+        click.echo(info['memory'])
+
+    # Disk Information
+    click.echo("\n" + "=" * 40 + " Disk Information " + "=" * 40)
+    click.echo(info['disks'])
 
 
 # Add aliases for the command

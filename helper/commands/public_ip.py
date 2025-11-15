@@ -1,20 +1,31 @@
 import click
+import subprocess
 from helper import __version__
-from helper.utils import run_cmd
+
+
+def get_public_ip():
+    """Get the public IP address."""
+    cmd = "curl -s ifconfig.me"
+    try:
+        result = subprocess.check_output(cmd, shell=True, text=True).strip()
+        return result
+    except subprocess.CalledProcessError as e:
+        return f"Error: {e}"
 
 
 @click.command()
 def public_ip():
     """Display the public (external) IP address.
-    
+
     This command retrieves and displays your public IP address as seen from the internet.
     It's useful for checking your current external network identity.
-    
+
     Examples:
         $ h pubip
         203.0.113.45
-        
+
     Note: Requires an active internet connection. Uses ifconfig.me service by default.
     """
-    cmd = "curl -s ifconfig.me"
-    run_cmd(cmd)
+    result = get_public_ip()
+    print(f"$ curl -s ifconfig.me")
+    print(result)

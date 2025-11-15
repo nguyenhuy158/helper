@@ -1,5 +1,6 @@
 """Verbosity handling for CLI commands."""
 import logging
+import re
 import click
 
 
@@ -18,7 +19,7 @@ class VerbosityCommand(click.Command):
             arg = args[i]
             if arg == "--verbose":
                 verbose += 1
-            elif arg.startswith("-"):
+            elif re.match(r'^-v+$', arg):
                 verbose += arg.count("v")
             else:
                 new_args.append(arg)
@@ -61,7 +62,7 @@ class VerbosityGroup(click.Group):
         for arg in args:
             if arg == "--verbose":
                 verbose += 1
-            elif arg.startswith("-"):
+            elif re.match(r'^-v+$', arg):
                 verbose += arg.count("v")
             else:
                 processed_args.append(arg)

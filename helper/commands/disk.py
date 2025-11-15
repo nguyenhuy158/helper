@@ -70,62 +70,80 @@ def disk_cmd(ctx):
 @disk_cmd.command(name="usage")
 def disk_usage():
     """Display disk usage information."""
-    system = platform.system().lower()
-
-    if system in ["linux", "darwin"]:
-        output = run_command("df -h")
-        click.echo(output)
-    elif system == "windows":
-        disks = run_command("wmic logicaldisk get size,freespace,caption")
-        if "Caption" in disks:
-            result = parse_windows_disk_info(disks)
-            click.echo("\n".join(result))
-        else:
-            click.echo(disks)
-    else:
-        click.echo("Unsupported operating system")
+    output = get_usage()
+    click.echo(output)
 
 
 @disk_cmd.command(name="mount")
 def disk_mount():
     """Display mounted filesystems."""
-    system = platform.system().lower()
-
-    if system in ["linux", "darwin"]:
-        output = run_command("mount")
-        click.echo(output)
-    elif system == "windows":
-        output = run_command("mountvol")
-        click.echo(output)
-    else:
-        click.echo("Unsupported operating system")
+    output = get_mount()
+    click.echo(output)
 
 
 @disk_cmd.command(name="list")
 def disk_list():
     """List disks and their capacities."""
+    output = get_list()
+    click.echo(output)
+
+
+def get_usage():
+    """Get disk usage information as string."""
+    system = platform.system().lower()
+
+    if system in ["linux", "darwin"]:
+        output = run_command("df -h")
+        return output
+    elif system == "windows":
+        disks = run_command("wmic logicaldisk get size,freespace,caption")
+        if "Caption" in disks:
+            result = parse_windows_disk_info(disks)
+            return "\n".join(result)
+        else:
+            return disks
+    else:
+        return "Unsupported operating system"
+
+
+def get_mount():
+    """Get mounted filesystems information as string."""
+    system = platform.system().lower()
+
+    if system in ["linux", "darwin"]:
+        output = run_command("mount")
+        return output
+    elif system == "windows":
+        output = run_command("mountvol")
+        return output
+    else:
+        return "Unsupported operating system"
+
+
+def get_list():
+    """Get list of disks and their capacities as string."""
     system = platform.system().lower()
 
     if system in ["linux", "darwin"]:
         output = run_command("df -h")
         lines = output.split("\n")
         if lines:
-            click.echo(f"Number of mounted filesystems: {len(lines) - 1}")  # minus header
-            click.echo("Disk capacities:")
-            click.echo(output)
+            count = len(lines) - 1  # minus header
+            return f"Number of mounted filesystems: {count}\nDisk capacities:\n{output}"
+        else:
+            return output
     elif system == "windows":
         disks = run_command("wmic logicaldisk get size,freespace,caption")
         if "Caption" in disks:
             lines = disks.split("\n")
             disk_list = [line for line in lines[1:] if line.strip()]
-            click.echo(f"Number of logical disks: {len(disk_list)}")
-            click.echo("Disk capacities:")
+            count = len(disk_list)
             result = parse_windows_disk_info(disks)
-            click.echo("\n".join(result))
+            return f"Number of logical disks: {count}\nDisk capacities:\n" + "\n".join(result)
         else:
-            click.echo(disks)
+            return disks
     else:
-        click.echo("Unsupported operating system")
+        return "Unsupported operating system"
 
 
 def disk():

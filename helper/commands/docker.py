@@ -12,7 +12,6 @@ import sys
 from typing import Dict, List
 
 import click
-from helper import __version__
 
 # Configure logging
 logging.basicConfig(
@@ -110,12 +109,8 @@ def get_container_ports(container_id: str, verbosity: Verbosity) -> List[Dict]:
 
                 if container_port and host_port:
                     port_info = {
-                        "container_port": container_port.split("/")[
-                            0
-                        ],  # Remove /tcp or /udp
-                        "host_ip": (
-                            host_ip if host_ip not in ("0.0.0.0", "") else "localhost"
-                        ),
+                        "container_port": container_port.split("/")[0],  # Remove /tcp or /udp
+                        "host_ip": (host_ip if host_ip not in ("0.0.0.0", "") else "localhost"),
                         "host_port": host_port,
                     }
                     verbosity.info("Added port mapping: %s", port_info)
@@ -143,14 +138,12 @@ def check_docker(verbosity: Verbosity) -> bool:
     """Check if Docker is installed and running."""
     verbosity.info("Checking if Docker is installed and running...")
     try:
-        result = subprocess.run(["docker", "info"], capture_output=True, text=True)
+        result = subprocess.run(["docker", "info"], capture_output=True, text=True, check=False)
 
         verbosity.debug(f"Docker info command output:\n{result.stdout}")
 
         if result.returncode != 0:
-            verbosity.error(
-                f"Docker is not running or not accessible. Error: {result.stderr}"
-            )
+            verbosity.error(f"Docker is not running or not accessible. Error: {result.stderr}")
             return False
 
         verbosity.info("Docker is running and accessible")
@@ -236,9 +229,7 @@ def docker(ctx, verbose):
         )
     )
 
-    logger.debug(
-        "Docker command group initialized with verbosity level: %s", verbosity_level
-    )
+    logger.debug("Docker command group initialized with verbosity level: %s", verbosity_level)
 
     verbosity.debug("Initializing Docker command group")
     if not check_docker(verbosity):
@@ -249,12 +240,8 @@ def docker(ctx, verbose):
         ctx.exit(1)
 
 
-@docker.command(
-    context_settings={"ignore_unknown_options": True, "allow_extra_args": True}
-)
-@click.option(
-    "--all", "-a", is_flag=True, help="Show all containers (default shows just running)"
-)
+@docker.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
+@click.option("--all", "-a", is_flag=True, help="Show all containers (default shows just running)")
 @click.option(
     "--all-containers",
     is_flag=True,
@@ -281,7 +268,7 @@ def ps(ctx, all_containers, output_format):  # pylint: disable=redefined-builtin
 
     try:
         verbosity.debug(f"Running command: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
         if result.returncode == 0:
             if output_format == "json":
@@ -300,10 +287,7 @@ def ps(ctx, all_containers, output_format):  # pylint: disable=redefined-builtin
                     try:
                         data = [json.loads(line) for line in lines[1:]]
                         headers = data[0].keys()
-                        rows = [
-                            [item.get(header, "") for header in headers]
-                            for item in data
-                        ]
+                        rows = [[item.get(header, "") for header in headers] for item in data]
 
                         # Calculate column widths
                         col_widths = [
@@ -316,8 +300,7 @@ def ps(ctx, all_containers, output_format):  # pylint: disable=redefined-builtin
 
                         # Print header
                         header_row = "  ".join(
-                            header.ljust(width)
-                            for header, width in zip(headers, col_widths)
+                            header.ljust(width) for header, width in zip(headers, col_widths)
                         )
                         click.echo(header_row)
                         click.echo("-" * len(header_row))
@@ -326,8 +309,7 @@ def ps(ctx, all_containers, output_format):  # pylint: disable=redefined-builtin
                         for row in rows:
                             click.echo(
                                 "  ".join(
-                                    str(cell).ljust(width)
-                                    for cell, width in zip(row, col_widths)
+                                    str(cell).ljust(width) for cell, width in zip(row, col_widths)
                                 )
                             )
                     except Exception as e:
@@ -350,14 +332,10 @@ def ps(ctx, all_containers, output_format):  # pylint: disable=redefined-builtin
         click.echo(error_msg, err=True)
 
 
-@docker.command(
-    context_settings={"ignore_unknown_options": True, "allow_extra_args": True}
-)
+@docker.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.argument("image", required=False)
 @click.option("--name", help="Assign a name to the container")
-@click.option(
-    "--port", "-p", multiple=True, help="Publish a container's port(s) to the host"
-)
+@click.option("--port", "-p", multiple=True, help="Publish a container's port(s) to the host")
 @click.option(
     "--detach",
     "-d",
@@ -403,7 +381,7 @@ def run(ctx, image, name, port, detach, env, volume):
 
     try:
         verbosity.debug(f"Running command: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
         if result.returncode == 0:
             if result.stdout:
@@ -422,9 +400,7 @@ def run(ctx, image, name, port, detach, env, volume):
         ctx.exit(1)
 
 
-@docker.command(
-    context_settings={"ignore_unknown_options": True, "allow_extra_args": True}
-)
+@docker.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.argument("containers", nargs=-1, required=False)
 @click.option(
     "--force",
@@ -467,7 +443,7 @@ def rm(ctx, containers, force, volumes):
 
     try:
         verbosity.debug(f"Running command: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
         if result.returncode == 0:
             if result.stdout.strip():
@@ -486,25 +462,117 @@ def rm(ctx, containers, force, volumes):
         ctx.exit(1)
 
 
-@docker.command(
-    context_settings={"ignore_unknown_options": True, "allow_extra_args": True}
-)
+@docker.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.option(
     "--show-all",
     "-a",
     is_flag=True,
     help="Show all containers (default shows just running)",
 )
-@click.option(
-    "--http-only", "-h", is_flag=True, help="Show only containers with HTTP/HTTPS ports"
-)
+@click.option("--http-only", "-h", is_flag=True, help="Show only containers with HTTP/HTTPS ports")
 @click.pass_context
+def _parse_port_string(port_str):
+    """Parse port string and return port number and protocol."""
+    port_num = None
+    protocol = "tcp"  # default protocol
+
+    # Handle format like '8069/tcp' or '80/http'
+    if "/" in port_str:
+        port_num, protocol = port_str.split("/", 1)
+    # Handle format like '0.0.0.0:8080->80/tcp'
+    elif "->" in port_str:
+        _, port_mapping = port_str.split("->", 1)
+        if "/" in port_mapping:
+            port_num, protocol = port_mapping.split("/", 1)
+        else:
+            port_num = port_mapping
+    else:
+        port_num = port_str
+
+    # Clean up port number (remove any non-numeric characters)
+    port_num = "".join(c for c in port_num if c.isdigit())
+    return port_num, protocol
+
+
+def _process_container_urls(container_id, name, verbosity):
+    """Process port mappings for a container and return list of URLs."""
+    urls = []
+    port_mappings = get_container_ports(container_id, verbosity)
+    verbosity.debug(f"Found {len(port_mappings)} port mappings for {name}")
+
+    for port in port_mappings:
+        if not port.get("host_port") or not port.get("container_port"):
+            verbosity.debug(f"Skipping incomplete port mapping: {port}")
+            continue
+
+        verbosity.debug(f"Checking port mapping: {port}")
+        verbosity.debug(f"Container name: {name}, Port: {port['container_port']}")
+
+        port_num, protocol = _parse_port_string(port["container_port"])
+
+        if port_num:
+            scheme = "http"
+            host = port["host_ip"]
+            if ":" in host and not host.startswith("["):
+                host = f"[{host}]"
+
+            url = f"{scheme}://{host}:{port['host_port']}"
+            urls.append({"url": url, "port": port_num, "protocol": protocol})
+            verbosity.info(f"Added URL for {name}: {url} (port {port_num}/{protocol})")
+
+    return urls
+
+
+def _parse_container_line(line, verbosity):
+    """Parse a container line and return container info dict."""
+    verbosity.debug(f"Processing container line: {line}")
+    container_id, name, status, ports = line.split("|", 3)
+    is_running = "Up" in status
+    verbosity.info(
+        f"Container: ID={container_id[:12]}, Name={name}, Status={status}, Running={is_running}"
+    )
+
+    container_info = {
+        "id": container_id[:12],  # Short ID
+        "name": name,
+        "status": status,
+        "urls": _process_container_urls(container_id, name, verbosity),
+    }
+
+    return container_info, is_running
+
+
+def _display_containers(containers, title, color, dim=False, verbosity=None):
+    """Display a list of containers with their URLs."""
+    if not containers:
+        return
+
+    click.secho(f"\n{title}", fg=color, bold=True)
+    for container in containers:
+        if verbosity:
+            verbosity.debug(f"Displaying container: {container['name']}")
+        name_style = click.style(container["name"], dim=dim)
+        if not dim:
+            name_style = click.style(name_style, bold=True)
+        click.echo(f"\n{click.style('●', fg=color)} {name_style} ({container['id']})")
+
+        if container["urls"]:
+            if verbosity:
+                verbosity.info(f"Found {len(container['urls'])} URLs for {container['name']}")
+            for url_info in container["urls"]:
+                if verbosity:
+                    verbosity.debug(f"Displaying URL: {url_info['url']}")
+                url_style = click.style(url_info["url"], fg="blue", underline=True, dim=dim)
+                click.echo(f"   {click.style('→', fg='blue')} {url_style}")
+        else:
+            if verbosity:
+                verbosity.debug(f"No URLs found for {container['name']}")
+
+
 def url(ctx, show_all, http_only):
     """Show containers with their HTTP/HTTPS URLs."""
     verbosity = ctx.obj["verbosity"]
-    verbosity.info(
-        f"Starting url command with show_all={show_all}, http_only={http_only}"
-    )
+    verbosity.info(f"Starting url command with show_all={show_all}, http_only={http_only}")
 
     try:
         # Get all containers
@@ -513,7 +581,7 @@ def url(ctx, show_all, http_only):
             cmd.append("-a")
 
         verbosity.debug(f"Running command: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
         if result.returncode != 0:
             error_msg = f"Error listing containers: {result.stderr}"
@@ -535,80 +603,7 @@ def url(ctx, show_all, http_only):
                 continue
 
             try:
-                verbosity.debug(f"Processing container line: {line}")
-                container_id, name, status, ports = line.split("|", 3)
-                is_running = "Up" in status
-                verbosity.info(
-                    f"Container: ID={container_id[:12]}, Name={name}, Status={status}, Running={is_running}"
-                )
-
-                # Get container details
-                container_info = {
-                    "id": container_id[:12],  # Short ID
-                    "name": name,
-                    "status": status,
-                    "urls": [],
-                }
-
-                # Get exposed ports and their mappings
-                port_mappings = get_container_ports(container_id, verbosity)
-                verbosity.debug(f"Found {len(port_mappings)} port mappings for {name}")
-
-                for port in port_mappings:
-                    if not port.get("host_port") or not port.get("container_port"):
-                        verbosity.debug(f"Skipping incomplete port mapping: {port}")
-                        continue
-
-                    verbosity.debug(f"Checking port mapping: {port}")
-                    verbosity.debug(
-                        f"Container name: {name}, Port: {port['container_port']}"
-                    )
-
-                    # Handle different port string formats (e.g., '8069/tcp', '0.0.0.0:8080->80/tcp')
-                    port_str = port["container_port"]
-
-                    # Extract port number and protocol
-                    port_num = None
-                    protocol = "tcp"  # default protocol
-
-                    # Handle format like '8069/tcp' or '80/http'
-                    if "/" in port_str:
-                        port_num, protocol = port_str.split("/", 1)
-                    # Handle format like '0.0.0.0:8080->80/tcp'
-                    elif "->" in port_str:
-                        _, port_mapping = port_str.split("->", 1)
-                        if "/" in port_mapping:
-                            port_num, protocol = port_mapping.split("/", 1)
-                        else:
-                            port_num = port_mapping
-                    else:
-                        port_num = port_str
-
-                    # Clean up port number (remove any non-numeric characters)
-                    port_num = "".join(c for c in port_num if c.isdigit())
-
-                    # Map all ports to HTTP URLs
-                    if port_num:  # Process all ports regardless of protocol
-                        scheme = "http"
-
-                        # Handle IPv6 addresses (add brackets if needed)
-                        host = port["host_ip"]
-                        if ":" in host and not host.startswith("["):
-                            host = f"[{host}]"
-                            verbosity.info(
-                                f"Skipping non-HTTP port: {port['container_port']}"
-                            )
-                            continue
-
-                        url = f"{scheme}://{host}:{port['host_port']}"
-
-                        container_info["urls"].append(
-                            {"url": url, "port": port_num, "protocol": protocol}
-                        )
-                        verbosity.info(
-                            f"Added URL for {name}: {url} (port {port_num}/{protocol})"
-                        )
-                        verbosity.info(f"Added URL for {name}: {url} (port {port_num})")
+                container_info, is_running = _parse_container_line(line, verbosity)
 
                 # If http_only is True and no HTTP URLs, skip this container
                 if http_only and not container_info["urls"]:
@@ -623,51 +618,18 @@ def url(ctx, show_all, http_only):
                 click.echo(f"Error processing container info: {e}", err=True)
                 continue
 
-        # Display running containers
-        if running_containers:
-            click.secho("\n🚀 Running Containers:", fg="green", bold=True)
-            for container in running_containers:
-                verbosity.debug(f"Displaying running container: {container['name']}")
-                click.echo(
-                    f"\n{click.style('●', fg='green')} {click.style(container['name'], bold=True)} ({container['id']})"
-                )
-
-                if container["urls"]:
-                    verbosity.info(
-                        f"Found {len(container['urls'])} URLs for {container['name']}"
-                    )
-                    for url_info in container["urls"]:
-                        verbosity.debug(f"Displaying URL: {url_info['url']}")
-                        click.echo(
-                            f"   {click.style('→', fg='blue')} {click.style(url_info['url'], fg='blue', underline=True)}"
-                        )
-                else:
-                    verbosity.debug(f"No URLs found for {container['name']}")
-
-        # Display stopped containers
-        if stopped_containers and (show_all or not http_only):
-            click.secho("\n⏸️  Stopped Containers:", fg="yellow", bold=True)
-            for container in stopped_containers:
-                verbosity.debug(f"Displaying stopped container: {container['name']}")
-                click.echo(
-                    f"\n{click.style('●', fg='yellow')} {click.style(container['name'], dim=True)} ({container['id']})"
-                )
-
-                if container["urls"]:
-                    verbosity.info(
-                        f"Found {len(container['urls'])} URLs for stopped container {container['name']}"
-                    )
-                    for url_info in container["urls"]:
-                        verbosity.debug(
-                            f"Displaying URL for stopped container: {url_info['url']}"
-                        )
-                        click.echo(
-                            f"   {click.style('→', fg='blue')} {click.style(url_info['url'], fg='blue', underline=True, dim=True)}"
-                        )
-                else:
-                    verbosity.debug(
-                        f"No URLs found for stopped container {container['name']}"
-                    )
+        # Display containers
+        _display_containers(
+            running_containers, "🚀 Running Containers:", "green", verbosity=verbosity
+        )
+        if show_all or not http_only:
+            _display_containers(
+                stopped_containers,
+                "⏸️  Stopped Containers:",
+                "yellow",
+                dim=True,
+                verbosity=verbosity,
+            )
 
         if not running_containers and not stopped_containers:
             msg = "No containers found."
@@ -675,7 +637,8 @@ def url(ctx, show_all, http_only):
             click.echo(msg)
         else:
             verbosity.info(
-                f"Displayed {len(running_containers)} running and {len(stopped_containers)} stopped containers"
+                f"Displayed {len(running_containers)} running and "
+                f"{len(stopped_containers)} stopped containers"
             )
 
     except Exception as e:
@@ -684,9 +647,7 @@ def url(ctx, show_all, http_only):
         click.echo(error_msg, err=True)
 
 
-@docker.command(
-    context_settings={"ignore_unknown_options": True, "allow_extra_args": True}
-)
+@docker.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.argument("image", required=False)
 @click.option(
     "--all-tags",
@@ -769,7 +730,7 @@ def rmi(ctx, image, all_tags, force, no_prune):
 
     try:
         verbosity.debug(f"Running command: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
         if result.returncode == 0:
             if result.stdout.strip():
@@ -819,7 +780,7 @@ def clean(ctx, dry_run):
             if not dry_run:
                 rmi_cmd = ["docker", "rmi"] + dangling_images
                 verbosity.debug(f"Running: {' '.join(rmi_cmd)}")
-                rmi_result = subprocess.run(rmi_cmd, capture_output=True, text=True)
+                rmi_result = subprocess.run(rmi_cmd, capture_output=True, text=True, check=False)
                 if rmi_result.returncode == 0:
                     verbosity.info("Successfully removed dangling images")
                     if rmi_result.stdout.strip():
@@ -853,7 +814,7 @@ def clean(ctx, dry_run):
             click.echo("- All dangling build cache")
         else:
             verbosity.debug(f"Running: {' '.join(prune_cmd)}")
-            prune_result = subprocess.run(prune_cmd, capture_output=True, text=True)
+            prune_result = subprocess.run(prune_cmd, capture_output=True, text=True, check=False)
             if prune_result.returncode == 0:
                 verbosity.info("System prune completed successfully")
                 if prune_result.stdout.strip():

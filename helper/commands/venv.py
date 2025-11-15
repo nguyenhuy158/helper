@@ -58,6 +58,7 @@ def source_virtualenv(venv_path=None):
                 "create one with 'python -m venv venv'"
             )
             sys.exit(1)
+            return
     else:
         # If path is provided, check if it's a directory or activate script
         if os.path.isdir(venv_path):
@@ -66,12 +67,14 @@ def source_virtualenv(venv_path=None):
             if not os.path.exists(activate_script):
                 click.echo(f"Error: No activate script found in {venv_path}", err=True)
                 sys.exit(1)
+                return
         elif os.path.isfile(venv_path):
             # If it's a file, use it directly
             activate_script = venv_path
         else:
             click.echo(f"Error: {venv_path} is not a valid file or directory", err=True)
             sys.exit(1)
+            return
 
     # Get the absolute path to the activate script
     activate_script = os.path.abspath(activate_script)

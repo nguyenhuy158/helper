@@ -1,50 +1,50 @@
 """File management commands."""
+
+import datetime
 import os
 import time
 import click
-from pathlib import Path
 from typing import List, Optional, Tuple, Callable
-from datetime import datetime
 
 
 def get_sorted_files(
     directory: str,
     extension: Optional[str] = None,
     sort_key: Optional[Callable[[os.DirEntry], float]] = None,
-    reverse: bool = False
+    reverse: bool = False,
 ) -> List[Tuple[os.DirEntry, float]]:
     """Get files sorted by specified key.
-    
+
     Args:
         directory: Directory to search in
         extension: Optional file extension to filter by (without dot)
         sort_key: Function to extract sort key from DirEntry
         reverse: If True, sort in descending order
-        
+
     Returns:
         List of (file_entry, sort_key) tuples
     """
     if not os.path.isdir(directory):
         raise click.BadParameter(f"Directory not found: {directory}")
-    
+
     files = []
     with os.scandir(directory) as it:
         for entry in it:
             if not entry.is_file():
                 continue
-                
+
             if extension and not entry.name.lower().endswith(f".{extension.lower()}"):
                 continue
-                
+
             if sort_key:
                 try:
                     key = sort_key(entry)
                     files.append((entry, key))
-                except (OSError, ValueError) as e:
+                except (OSError, ValueError):
                     continue
             else:
                 files.append((entry, 0))
-    
+
     # Sort by the sort key
     files.sort(key=lambda x: x[1], reverse=reverse)
     return files
@@ -60,15 +60,15 @@ def format_file_info(entry: os.DirEntry, size: bool = True, modified: bool = Tru
             info.append(f"{size_str:>10}")
         except OSError:
             info.append(" " * 10)
-    
+
     if modified:
         try:
             mtime = entry.stat().st_mtime
-            mtime_str = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+            mtime_str = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
             info.append(mtime_str)
         except OSError:
             info.append(" " * 19)
-    
+
     info.append(entry.name)
     return "  ".join(info)
 
@@ -77,15 +77,15 @@ def human_readable_size(size_bytes: int) -> str:
     """Convert size in bytes to human readable format."""
     if size_bytes == 0:
         return "0B"
-    
-    units = ['B', 'KB', 'MB', 'GB', 'TB']
+
+    units = ["B", "KB", "MB", "GB", "TB"]
     unit_idx = 0
     size = float(size_bytes)
-    
+
     while size >= 1024 and unit_idx < len(units) - 1:
         size /= 1024
         unit_idx += 1
-    
+
     return f"{size:.1f}{units[unit_idx]}"
 
 
@@ -116,7 +116,9 @@ def human_readable_size(size_bytes: int) -> str:
     help="Show last modified time",
 )
 @click.pass_context
-def file_cmd(ctx: click.Context, directory: str, extension: str, size: bool, modified: bool) -> None:
+def file_cmd(
+    ctx: click.Context, directory: str, extension: str, size: bool, modified: bool
+) -> None:
     """File management and processing commands."""
     ctx.ensure_object(dict)
     ctx.obj["directory"] = directory
@@ -140,23 +142,23 @@ def newest_files(ctx: click.Context, count: int) -> None:
     extension = ctx.obj["extension"]
     show_size = ctx.obj["show_size"]
     show_modified = ctx.obj["show_modified"]
-    
+
     try:
         files = get_sorted_files(
             directory=directory,
             extension=extension,
             sort_key=lambda e: e.stat().st_mtime,
-            reverse=True
+            reverse=True,
         )
-        
+
         if not files:
             click.echo("No files found.")
             return
-            
+
         click.echo(f"Newest files in {directory}:")
         for i, (entry, _) in enumerate(files[:count], 1):
             click.echo(f"{i}. {format_file_info(entry, show_size, show_modified)}")
-            
+
     except Exception as e:
         raise click.ClickException(str(e))
 
@@ -176,27 +178,28 @@ def oldest_files(ctx: click.Context, count: int) -> None:
     extension = ctx.obj["extension"]
     show_size = ctx.obj["show_size"]
     show_modified = ctx.obj["show_modified"]
-    
+
     try:
         files = get_sorted_files(
             directory=directory,
             extension=extension,
             sort_key=lambda e: e.stat().st_mtime,
-            reverse=False
+            reverse=False,
         )
-        
+
         if not files:
             click.echo("No files found.")
             return
-            
+
         click.echo(f"Oldest files in {directory}:")
         for i, (entry, _) in enumerate(files[:count], 1):
             click.echo(f"{i}. {format_file_info(entry, show_size, show_modified)}")
-            
+
     except Exception as e:
         raise click.ClickException(str(e))
 
 
 # Add this to register the command group
 def file():
+    """File command group."""
     return file_cmd

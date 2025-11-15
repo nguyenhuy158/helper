@@ -1,6 +1,7 @@
 APP_NAME = helper-cli
+VENV_ACTIVATE = . venv/bin/activate &&
 
-.PHONY: help build publish test-publish test-publish-patch test-publish-minor test-publish-major patch minor major clean push-tags all arch d env f ip kill nix pubip run si sp v
+.PHONY: help build publish test-publish test-publish-patch test-publish-minor test-publish-major patch minor major clean push-tags rsync lint format test all arch d env f ip kill nix pubip run si sp v
 
 # Default target: show help
 help:
@@ -16,6 +17,9 @@ help:
 	@echo "  minor               - Bump minor version (0.1.0 → 0.2.0)"
 	@echo "  major               - Bump major version (1.0.0 → 2.0.0)"
 	@echo "  clean               - Clean build artifacts"
+	@echo "  lint                - Run pylint on the codebase"
+	@echo "  format              - Format code using Black"
+	@echo "  test                - Run pytest test suite"
 	@echo "  push-tags           - Push all git tags to remote"
 	@echo ""
 	@echo "CLI Commands (run with helper):"
@@ -29,62 +33,78 @@ help:
 	@echo "  nix      - NixOS info"
 	@echo "  pubip    - Public IP"
 	@echo "  run      - Run snippets"
+	@echo "  rsync    - Rsync file synchronization"
 	@echo "  si       - System info"
 	@echo "  sp       - Speed test"
 	@echo "  v        - Virtual environments"
 
-build:
-	python -m build
+build: lint
+	$(VENV_ACTIVATE) python -m build
 
 publish:
 	make patch
-	twine upload dist/*
+	$(VENV_ACTIVATE) twine upload dist/*
 
 test-publish:
 	make patch
-	twine upload --repository testpypi dist/*
+	$(VENV_ACTIVATE) twine upload --repository testpypi dist/*
 
 test-publish-patch:
-	bump2version patch
+	$(VENV_ACTIVATE) bump2version patch
 	make clean
 	make build
-	twine upload --repository testpypi dist/*
+	$(VENV_ACTIVATE) twine upload --repository testpypi dist/*
 
 test-publish-minor:
-	bump2version minor
+	$(VENV_ACTIVATE) bump2version minor
 	make clean
 	make build
-	twine upload --repository testpypi dist/*
+	$(VENV_ACTIVATE) twine upload --repository testpypi dist/*
 
 test-publish-major:
-	bump2version major
+	$(VENV_ACTIVATE) bump2version major
 	make clean
 	make build
-	twine upload --repository testpypi dist/*
+	$(VENV_ACTIVATE) twine upload --repository testpypi dist/*
 
 # Tự tăng version patch: 0.1.0 → 0.1.1
 patch:
-	bump2version patch
+	$(VENV_ACTIVATE) bump2version patch
 	make clean
 	make build
 
 # Tăng version minor: 0.1.0 → 0.2.0
 minor:
-	bump2version minor
+	$(VENV_ACTIVATE) bump2version minor
 	make clean
 	make build
 
 # Tăng version major: 1.0.0 → 2.0.0
 major:
-	bump2version major
+	$(VENV_ACTIVATE) bump2version major
 	make clean
 	make build
 
 clean:
 	rm -rf dist build *.egg-info
 
+lint:
+	$(VENV_ACTIVATE) python -m pip install -e .[dev]
+	$(VENV_ACTIVATE) pylint helper
+
+format:
+	$(VENV_ACTIVATE) python -m pip install -e .[dev]
+	$(VENV_ACTIVATE) black helper
+
+test:
+	$(VENV_ACTIVATE) python -m pip install -e .[dev]
+	$(VENV_ACTIVATE) pytest
+
 push-tags:
 	git push --tags origin
+
+rsync:
+	helper rsync
 
 # CLI command shortcuts
 all:

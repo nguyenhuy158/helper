@@ -1,6 +1,7 @@
-import click
+"""Arch command for helper CLI."""
+
 import subprocess
-from helper import __version__
+import click
 
 
 def get_arch():
@@ -27,5 +28,5 @@ def arch():
         arm64
     """
     result = get_arch()
-    print(f"$ uname -m")
+    print("$ uname -m")
     print(result)

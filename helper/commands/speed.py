@@ -1,12 +1,14 @@
 import click
+
+"""Speed test commands."""
+
 import speedtest
-from time import time
 
 
 def format_speed(speed_bps):
     """Convert speed from bits per second to appropriate unit."""
-    for unit in ['bps', 'Kbps', 'Mbps', 'Gbps']:
-        if speed_bps < 1000 or unit == 'Gbps':
+    for unit in ["bps", "Kbps", "Mbps", "Gbps"]:
+        if speed_bps < 1000 or unit == "Gbps":
             return f"{speed_bps:.2f} {unit}"
         speed_bps /= 1000
 
@@ -25,17 +27,17 @@ def get_speed():
         ping = st.results.ping
 
         return {
-            'client': st.results.client,
-            'server': server,
-            'ping': ping,
-            'download': download_speed,
-            'upload': upload_speed
+            "client": st.results.client,
+            "server": server,
+            "ping": ping,
+            "download": download_speed,
+            "upload": upload_speed,
         }
 
     except speedtest.SpeedtestException as e:
-        return {'error': f"Error running speed test: {str(e)}"}
+        return {"error": f"Error running speed test: {str(e)}"}
     except Exception as e:
-        return {'error': f"An unexpected error occurred: {str(e)}"}
+        return {"error": f"An unexpected error occurred: {str(e)}"}
 
 
 @click.command()
@@ -47,20 +49,22 @@ def speed(simple):
     using the speedtest.net service through the Python speedtest-cli library.
     """
     result = get_speed()
-    if 'error' in result:
-        click.echo(result['error'], err=True)
+    if "error" in result:
+        click.echo(result["error"], err=True)
         return 1
 
     click.echo("Finding best server...")
-    click.echo(f"Testing from {result['client']['isp']} ({result['client']['ip']})")
-    click.echo(f"Hosted by {result['server']['name']} ({result['server']['country']}) [{result['server']['d']:.2f} km]")
+    click.echo(f"Testing from {result['client']['isp']} " f"({result['client']['ip']})")
+    click.echo(
+        f"Hosted by {result['server']['name']} ({result['server']['country']}) [{result['server']['d']:.2f} km]"
+    )
 
     click.echo("Testing download speed...")
     click.echo("Testing upload speed...")
 
-    ping = result['ping']
-    download_speed = result['download']
-    upload_speed = result['upload']
+    ping = result["ping"]
+    download_speed = result["download"]
+    upload_speed = result["upload"]
 
     if simple:
         click.echo(f"Ping: {ping:.2f} ms")

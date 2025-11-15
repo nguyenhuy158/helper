@@ -344,12 +344,16 @@
 <ul>
 <li><em><a href="#helper-all">all</a></em>: Show all info</li>
 <li><em><a href="#helper-arch">arch</a></em>: Display system architecture information.</li>
+<li><em><a href="#helper-disk">disk</a></em>: Disk management commands.</li>
 <li><em><a href="#helper-docker">docker</a></em>: Docker container and image management.</li>
 <li><em><a href="#helper-env">env</a></em>: Manage environment variables.</li>
 <li><em><a href="#helper-file">file</a></em>: File management and processing commands.</li>
 <li><em><a href="#helper-internal-ip">internal-ip</a></em>: Display the local/internal IP address.</li>
+<li><em><a href="#helper-journalctl">journalctl</a></em>: Display useful journalctl options and examples for Linux systemd logs.</li>
+<li><em><a href="#helper-kill">kill</a></em>: Kill processes by name or port.</li>
 <li><em><a href="#helper-nixos">nixos</a></em>: NixOS related commands.</li>
 <li><em><a href="#helper-public-ip">public-ip</a></em>: Display the public (external) IP address.</li>
+<li><em><a href="#helper-rsync">rsync</a></em>: Synchronize files using rsync with common options.</li>
 <li><em><a href="#helper-run">run</a></em>: Run predefined command snippets.</li>
 <li><em><a href="#helper-speed">speed</a></em>: Test internet speed using speedtest.net</li>
 <li><em><a href="#helper-system-info">system-info</a></em>: Display system information including CPU, RAM, and disk usage</li>
@@ -409,19 +413,125 @@ if you're running on x86_64, arm64, or other architectures.</p>
 </tr>
 </tbody>
 </table>
+<h2 id="helper-disk">helper disk</h2>
+<p>Disk management commands.</p>
+<p><strong>Usage:</strong></p>
+<pre><code class="language-text">helper disk [OPTIONS] COMMAND [ARGS]...
+</code></pre>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code>, <code>-h</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#helper-disk-list">list</a></em>: List disks and their capacities.</li>
+<li><em><a href="#helper-disk-mount">mount</a></em>: Display mounted filesystems.</li>
+<li><em><a href="#helper-disk-usage">usage</a></em>: Display disk usage information.</li>
+</ul>
+<h3 id="helper-disk-list">helper disk list</h3>
+<p>List disks and their capacities.</p>
+<p><strong>Usage:</strong></p>
+<pre><code class="language-text">helper disk list [OPTIONS]
+</code></pre>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code>, <code>-h</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="helper-disk-mount">helper disk mount</h3>
+<p>Display mounted filesystems.</p>
+<p><strong>Usage:</strong></p>
+<pre><code class="language-text">helper disk mount [OPTIONS]
+</code></pre>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code>, <code>-h</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="helper-disk-usage">helper disk usage</h3>
+<p>Display disk usage information.</p>
+<p><strong>Usage:</strong></p>
+<pre><code class="language-text">helper disk usage [OPTIONS]
+</code></pre>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code>, <code>-h</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h2 id="helper-docker">helper docker</h2>
 <p>Docker container and image management.</p>
 <p>Manage Docker containers and images with subcommands for common operations.</p>
 <p>Subcommands:
-  ps    List containers
-  run   Run a command in a new container
-  rm    Remove one or more containers
-  rmi   Remove one or more images
-  url   Show containers with their HTTP/HTTPS URLs</p>
+  ps        List containers
+  run       Run a command in a new container
+  rm        Remove one or more containers
+  rmi       Remove one or more images
+  url       Show containers with their HTTP/HTTPS URLs
+  clean     Clean up disk space by removing unused resources
+  disk-used Show Docker disk usage information</p>
 <p>Examples:
   h d ps            # List running containers
   h d run nginx     # Run an nginx container
-  h d rm container  # Remove a container</p>
+  h d rm container  # Remove a container
+  h d clean         # Clean up unused Docker resources
+  h d disk-used     # Show disk usage</p>
 <p><strong>Usage:</strong></p>
 <pre><code class="language-text">helper docker [OPTIONS] COMMAND [ARGS]...
 </code></pre>
@@ -452,12 +562,104 @@ if you're running on x86_64, arm64, or other architectures.</p>
 </table>
 <p><strong>Subcommands</strong></p>
 <ul>
+<li><em><a href="#helper-docker-parse-port-string">-parse-port-string</a></em>: Parse port string and return port number and protocol.</li>
+<li><em><a href="#helper-docker-clean">clean</a></em>: Clean up Docker disk space by removing dangling images and unused resources.</li>
+<li><em><a href="#helper-docker-disk-used">disk-used</a></em>: Show Docker disk usage information.</li>
 <li><em><a href="#helper-docker-ps">ps</a></em>: List containers.</li>
 <li><em><a href="#helper-docker-rm">rm</a></em>: Remove one or more containers.</li>
 <li><em><a href="#helper-docker-rmi">rmi</a></em>: Remove one or more images.</li>
 <li><em><a href="#helper-docker-run">run</a></em>: Run a command in a new container.</li>
-<li><em><a href="#helper-docker-url">url</a></em>: Show containers with their HTTP/HTTPS URLs.</li>
 </ul>
+<h3 id="helper-docker-parse-port-string">helper docker -parse-port-string</h3>
+<p>Parse port string and return port number and protocol.</p>
+<p><strong>Usage:</strong></p>
+<pre><code class="language-text">helper docker -parse-port-string [OPTIONS]
+</code></pre>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--show-all</code>, <code>-a</code></td>
+<td>boolean</td>
+<td>Show all containers (default shows just running)</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--http-only</code>, <code>-h</code></td>
+<td>boolean</td>
+<td>Show only containers with HTTP/HTTPS ports</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="helper-docker-clean">helper docker clean</h3>
+<p>Clean up Docker disk space by removing dangling images and unused resources.</p>
+<p><strong>Usage:</strong></p>
+<pre><code class="language-text">helper docker clean [OPTIONS]
+</code></pre>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--dry-run</code></td>
+<td>boolean</td>
+<td>Show what would be cleaned without actually cleaning</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--help</code>, <code>-h</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="helper-docker-disk-used">helper docker disk-used</h3>
+<p>Show Docker disk usage information.</p>
+<p><strong>Usage:</strong></p>
+<pre><code class="language-text">helper docker disk-used [OPTIONS]
+</code></pre>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code>, <code>-h</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h3 id="helper-docker-ps">helper docker ps</h3>
 <p>List containers.</p>
 <p><strong>Usage:</strong></p>
@@ -626,42 +828,6 @@ if you're running on x86_64, arm64, or other architectures.</p>
 </tr>
 <tr>
 <td><code>--help</code>, <code>-h</code></td>
-<td>boolean</td>
-<td>Show this message and exit.</td>
-<td><code>False</code></td>
-</tr>
-</tbody>
-</table>
-<h3 id="helper-docker-url">helper docker url</h3>
-<p>Show containers with their HTTP/HTTPS URLs.</p>
-<p><strong>Usage:</strong></p>
-<pre><code class="language-text">helper docker url [OPTIONS]
-</code></pre>
-<p><strong>Options:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>--show-all</code>, <code>-a</code></td>
-<td>boolean</td>
-<td>Show all containers (default shows just running)</td>
-<td><code>False</code></td>
-</tr>
-<tr>
-<td><code>--http-only</code>, <code>-h</code></td>
-<td>boolean</td>
-<td>Show only containers with HTTP/HTTPS ports</td>
-<td><code>False</code></td>
-</tr>
-<tr>
-<td><code>--help</code></td>
 <td>boolean</td>
 <td>Show this message and exit.</td>
 <td><code>False</code></td>
@@ -967,6 +1133,59 @@ It automatically detects the correct network interface based on your OS.</p>
 </tr>
 </tbody>
 </table>
+<h2 id="helper-journalctl">helper journalctl</h2>
+<p>Display useful journalctl options and examples for Linux systemd logs.</p>
+<p><strong>Usage:</strong></p>
+<pre><code class="language-text">helper journalctl [OPTIONS]
+</code></pre>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code>, <code>-h</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="helper-kill">helper kill</h2>
+<p>Kill processes by name or port.</p>
+<p>TARGET can be a process name (e.g., 'python') or a port number (e.g., 8000).
+For names, kills all matching processes. For ports, kills the process listening on that port.</p>
+<p>Examples:
+    $ helper kill python
+    $ helper kill 8000</p>
+<p><strong>Usage:</strong></p>
+<pre><code class="language-text">helper kill [OPTIONS] [TARGET]
+</code></pre>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code>, <code>-h</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h2 id="helper-nixos">helper nixos</h2>
 <p>NixOS related commands.</p>
 <p><strong>Usage:</strong></p>
@@ -1085,6 +1304,37 @@ It's useful for checking your current external network identity.</p>
 <p>Note: Requires an active internet connection. Uses ifconfig.me service by default.</p>
 <p><strong>Usage:</strong></p>
 <pre><code class="language-text">helper public-ip [OPTIONS]
+</code></pre>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code>, <code>-h</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="helper-rsync">helper rsync</h2>
+<p>Synchronize files using rsync with common options.</p>
+<p>This command provides a convenient shorthand for rsync with archive (-a),
+verbose (-v), human-readable (-h), compress (-z), progress (--progress),
+inplace (--inplace), and partial (--partial) options.</p>
+<p>Equivalent to: rsync -havz --progress --inplace --partial SOURCE DEST</p>
+<p>Examples:
+    helper rsync /source/dir /dest/dir
+    helper rsync user@host:/remote/path /local/path</p>
+<p><strong>Usage:</strong></p>
+<pre><code class="language-text">helper rsync [OPTIONS] SOURCE DEST
 </code></pre>
 <p><strong>Options:</strong></p>
 <table>

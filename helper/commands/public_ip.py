@@ -1,6 +1,8 @@
-import click
 import subprocess
-from helper import __version__
+
+"""Public IP address commands."""
+
+import click
 
 
 def get_public_ip():
@@ -27,5 +29,5 @@ def public_ip():
     Note: Requires an active internet connection. Uses ifconfig.me service by default.
     """
     result = get_public_ip()
-    print(f"$ curl -s ifconfig.me")
+    print("$ curl -s ifconfig.me")
     print(result)

@@ -4,7 +4,6 @@ This module provides commands to manage NixOS packages and system operations.
 """
 
 import subprocess
-import sys
 
 import click
 
@@ -31,9 +30,7 @@ def get_nixos_version():
         return "Not running NixOS"
 
     try:
-        result = subprocess.run(
-            ["nixos-version"], capture_output=True, text=True, check=True
-        )
+        result = subprocess.run(["nixos-version"], capture_output=True, text=True, check=True)
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
         return f"Error getting NixOS version: {e.stderr}"
@@ -104,9 +101,7 @@ def clean(force):
 
         # Show disk space usage after cleanup
         click.echo("\nDisk space usage after cleanup:")
-        subprocess.run(
-            ["nix-store", "--query", "--disk-usage", "/nix/store"], check=False
-        )
+        subprocess.run(["nix-store", "--query", "--disk-usage", "/nix/store"], check=False)
 
     except subprocess.CalledProcessError as e:
         click.echo(f"Error during cleanup: {e}", err=True)

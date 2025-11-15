@@ -1,6 +1,11 @@
-import click
+"""Disk information command."""
+
 import platform
 import subprocess
+
+import click
+
+from ..utils import format_bytes
 
 
 def run_command(cmd):
@@ -14,28 +19,11 @@ def run_command(cmd):
         return f"Error: {e.output}" if e.output else "Command failed"
 
 
-def format_bytes(size_bytes):
-    """Convert bytes to human readable format"""
-    if not isinstance(size_bytes, (int, float)):
-        try:
-            size_bytes = float(size_bytes)
-        except (ValueError, TypeError):
-            return str(size_bytes)
-
-    for unit in ["B", "KB", "MB", "GB", "TB", "PB"]:
-        if size_bytes < 1024.0 or unit == "PB":
-            return f"{size_bytes:.1f} {unit}"
-        size_bytes /= 1024.0
-    return f"{size_bytes:.1f} PB"
-
-
 def parse_windows_disk_info(disks_output):
     """Parse Windows disk information from wmic output."""
     lines = disks_output.split("\n")
     result = [
-        "{:<5} {:<15} {:<15} {:<15} {:<10}".format(
-            "Drive", "Total Space", "Free Space", "Used Space", "% Used"
-        )
+        f"{'Drive':<5} {'Total Space':<15} {'Free Space':<15} {'Used Space':<15} {'% Used':<10}"
     ]
     for line in lines[1:]:
         parts = line.strip().split()
@@ -47,13 +35,8 @@ def parse_windows_disk_info(disks_output):
                 used = size - free
                 pct_used = (used / size) * 100 if size > 0 else 0
                 result.append(
-                    "{:<5} {:<15} {:<15} {:<15} {:.1f}%".format(
-                        drive,
-                        format_bytes(size),
-                        format_bytes(free),
-                        format_bytes(used),
-                        pct_used,
-                    )
+                    f"{drive:<5} {format_bytes(size):<15} {format_bytes(free):<15} "
+                    f"{format_bytes(used):<15} {pct_used:.1f}%"
                 )
             except (ValueError, IndexError):
                 continue
@@ -116,8 +99,7 @@ def get_mount():
     elif system == "windows":
         output = run_command("mountvol")
         return output
-    else:
-        return "Unsupported operating system"
+    return "Unsupported operating system"
 
 
 def get_list():
@@ -130,8 +112,7 @@ def get_list():
         if lines:
             count = len(lines) - 1  # minus header
             return f"Number of mounted filesystems: {count}\nDisk capacities:\n{output}"
-        else:
-            return output
+        return output
     elif system == "windows":
         disks = run_command("wmic logicaldisk get size,freespace,caption")
         if "Caption" in disks:
@@ -140,11 +121,11 @@ def get_list():
             count = len(disk_list)
             result = parse_windows_disk_info(disks)
             return f"Number of logical disks: {count}\nDisk capacities:\n" + "\n".join(result)
-        else:
-            return disks
-    else:
-        return "Unsupported operating system"
+        return disks
+    return "Unsupported operating system"
 
 
 def disk():
+    """Disk command group."""
     return disk_cmd
+

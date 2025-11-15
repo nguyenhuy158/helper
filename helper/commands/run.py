@@ -49,7 +49,7 @@ def run():
         h run exec --force click-odoo /path/to/script.py
         h run exec -f 1 /path/to/script.py
     """
-    pass  # Required for click command groups
+    # Required for click command groups
 
 
 @run.command(name="exec")
@@ -81,8 +81,7 @@ def exec_cmd(snippet, args, force):
     snippet_name = _get_snippet_by_index_or_name(snippet, snippets_list)
     if not snippet_name:
         click.echo(
-            f"Error: Snippet '{snippet}' not found. "
-            "Use 'h run list' to see available snippets.",
+            f"Error: Snippet '{snippet}' not found. " "Use 'h run list' to see available snippets.",
             err=True,
         )
         return
@@ -107,14 +106,10 @@ def _execute_snippet(name, args, force):
             sys.exit(1)
 
         # Always show the command that will be executed
-        click.echo(
-            f"Command to execute: {click.style(command, fg='yellow', bold=True)}"
-        )
+        click.echo(f"Command to execute: {click.style(command, fg='yellow', bold=True)}")
 
         # Ask for confirmation if not in force mode
-        if not force and not click.confirm(
-            "Do you want to run this command?", default=False
-        ):
+        if not force and not click.confirm("Do you want to run this command?", default=False):
             click.echo("Command execution cancelled.")
             return
 
@@ -175,12 +170,8 @@ def show_cmd(snippet):
     odoo_db_container = os.environ.get("ODOO_DB_CONTAINER", "fnp-db-1")
 
     click.echo("\nAvailable placeholders:")
-    click.echo(
-        f"  {{ODOO_CONTAINER}} - Odoo container name (current: {odoo_container})"
-    )
-    click.echo(
-        f"  {{ODOO_DB_CONTAINER}} - DB container name (current: {odoo_db_container})"
-    )
+    click.echo(f"  {{ODOO_CONTAINER}} - Odoo container name (current: {odoo_container})")
+    click.echo(f"  {{ODOO_DB_CONTAINER}} - DB container name (current: {odoo_db_container})")
     click.echo("  {file} - The first argument after the snippet name")
     click.echo("  {args} - All remaining arguments as a single string")
 

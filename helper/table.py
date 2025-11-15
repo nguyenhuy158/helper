@@ -1,5 +1,8 @@
-import click
+"""Table formatting utilities for the helper CLI."""
+
 import json
+
+import click
 import yaml
 from tabulate import tabulate
 
@@ -13,12 +16,13 @@ data = [{"name": "Huy", "age": 23}, {"name": "An", "age": 25}]
     type=click.Choice(["json", "yaml", "table", "text"]),
     default="table",
 )
-def show(format):
-    if format == "json":
+def show(output_format):
+    """Display data in various formats."""
+    if output_format == "json":
         click.echo(json.dumps(data, indent=2))
-    elif format == "yaml":
+    elif output_format == "yaml":
         click.echo(yaml.dump(data))
-    elif format == "table":
+    elif output_format == "table":
         click.echo(tabulate(data, headers="keys"))
     else:
         for item in data:

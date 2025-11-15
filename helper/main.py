@@ -1,8 +1,8 @@
-import click
 import logging
-import sys
-import subprocess
-from pathlib import Path
+
+import click
+
+"""Main entry point for the helper CLI application."""
 from . import __version__
 from .env_manager import load_env
 from .commands import (
@@ -22,6 +22,7 @@ from .commands import (
     kill,
     disk,
     journalctl,
+    rsync,
 )
 
 
@@ -38,9 +39,7 @@ VerbosityGroup = verbosity.VerbosityGroup
         "token_normalize_func": lambda x: "helper" if x == "h" else x,
     },
 )
-@click.version_option(
-    __version__, "-V", "--version", message="%(prog)s version %(version)s"
-)
+@click.version_option(__version__, "-V", "--version", message="%(prog)s version %(version)s")
 def cli():
     """Helper CLI - quick system info (v{})
 
@@ -77,6 +76,8 @@ cli.add_command(run_cmd, name="run")
 cli.add_command(kill.kill, name="kill")
 cli.add_command(disk.disk(), name="disk")
 cli.add_command(journalctl.journalctl(), name="journalctl")
+cli.add_command(rsync.rsync, name="rsync")
+cli.add_command(rsync.rsync, name="rsync")
 
 
 # Register the all command

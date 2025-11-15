@@ -1,14 +1,13 @@
 """Kill processes by name or port."""
+
 import subprocess
 
 import click
 import psutil
 
-from helper import __version__
-
 
 @click.command()
-@click.argument('target', required=False)
+@click.argument("target", required=False)
 @click.pass_context
 def kill(ctx, target):
     """Kill processes by name or port.
@@ -28,21 +27,25 @@ def kill(ctx, target):
         port = int(target)
         # Find process by port using lsof
         try:
-            result = subprocess.run(['lsof', '-i', f':{port}', '-t'],
-                                     capture_output=True, text=True, check=False)
+            result = subprocess.run(
+                ["lsof", "-i", f":{port}", "-t"], capture_output=True, text=True, check=False
+            )
             if result.returncode == 0:
-                pids = result.stdout.strip().split('\n')
+                pids = result.stdout.strip().split("\n")
                 for pid_str in pids:
                     if pid_str:
                         pid = int(pid_str)
                         try:
                             proc = psutil.Process(pid)
                             proc.kill()
-                            click.echo(f"Successfully terminated process {proc.name()} "
-                                       f"(PID: {pid}) listening on port {port}.")
+                            click.echo(
+                                f"Successfully terminated process {proc.name()} "
+                                f"(PID: {pid}) listening on port {port}."
+                            )
                         except psutil.AccessDenied:
-                            click.echo(f"Access denied: cannot kill process {pid} "
-                                       f"on port {port}.")
+                            click.echo(
+                                f"Access denied: cannot kill process {pid} " f"on port {port}."
+                            )
             else:
                 click.echo(f"No process found listening on port {port}.")
         except FileNotFoundError:
@@ -50,13 +53,16 @@ def kill(ctx, target):
     except ValueError:
         # Treat as process name
         killed = []
-        for proc in psutil.process_iter(['pid', 'name']):
-            if target.lower() in proc.info['name'].lower():
+        for proc in psutil.process_iter(["pid", "name"]):
+            if target.lower() in proc.info["name"].lower():
                 try:
                     proc.kill()
                     killed.append(f"{proc.info['name']} (PID: {proc.info['pid']})")
                 except psutil.AccessDenied:
-                    click.echo(f"Access denied: cannot kill process {proc.info['name']} (PID: {proc.info['pid']}).")
+                    click.echo(
+                        f"Access denied: cannot kill process {proc.info['name']} "
+                        f"(PID: {proc.info['pid']})."
+                    )
                     continue
         if killed:
             for msg in killed:

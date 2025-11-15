@@ -1,3 +1,5 @@
+"""Speed test utilities for the helper CLI."""
+
 import speedtest
 
 
@@ -11,6 +13,7 @@ def test_speed():
     print(f"Ping: {ping:.2f} ms")
     print(f"Download: {download:.2f} Mbps")
     print(f"Upload: {upload:.2f} Mbps")
+
 
 if __name__ == "__main__":
     test_speed()

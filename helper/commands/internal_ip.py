@@ -1,9 +1,12 @@
 import platform
+
+"""Internal IP address commands."""
+
 import socket
 import shutil
 import subprocess
 import click
-from helper import __version__
+
 
 def get_internal_ip():
     """Get the internal IP address based on the operating system."""
@@ -28,6 +31,7 @@ def get_internal_ip():
     else:
         ip = socket.gethostbyname(socket.gethostname())
         return ip
+
 
 @click.command()
 def internal_ip():

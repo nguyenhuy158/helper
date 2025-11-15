@@ -86,4 +86,25 @@ pip install --upgrade helper
 ### 🧑‍💻 Contribute
 
 Pull requests are welcome!
+
+Before submitting a PR, ensure your code passes pylint checks and tests:
+```bash
+make lint
+make test
+```
+
+#### Testing
+
+Run the test suite:
+```bash
+make test
+```
+
+Or run pytest directly:
+```bash
+pytest
+```
+
+Tests are located in the `tests/` directory. For detailed testing guidelines and conventions, see `src_docs/testing.md`.
+
 Repo: [https://github.com/nguyenhuy158/helper](https://github.com/nguyenhuy158/helper)

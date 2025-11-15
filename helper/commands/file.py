@@ -8,9 +8,9 @@ from datetime import datetime
 
 
 def get_sorted_files(
-    directory: str, 
-    extension: Optional[str] = None, 
-    sort_key: Callable[[os.DirEntry], float] = None,
+    directory: str,
+    extension: Optional[str] = None,
+    sort_key: Optional[Callable[[os.DirEntry], float]] = None,
     reverse: bool = False
 ) -> List[Tuple[os.DirEntry, float]]:
     """Get files sorted by specified key.

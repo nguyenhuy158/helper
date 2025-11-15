@@ -29,6 +29,37 @@ def format_bytes(size_bytes):
     return f"{size_bytes:.1f} PB"
 
 
+def parse_windows_disk_info(disks_output):
+    """Parse Windows disk information from wmic output."""
+    lines = disks_output.split("\n")
+    result = [
+        "{:<5} {:<15} {:<15} {:<15} {:<10}".format(
+            "Drive", "Total Space", "Free Space", "Used Space", "% Used"
+        )
+    ]
+    for line in lines[1:]:
+        parts = line.strip().split()
+        if len(parts) >= 3:
+            drive = parts[0]
+            try:
+                size = int(parts[1])
+                free = int(parts[2])
+                used = size - free
+                pct_used = (used / size) * 100 if size > 0 else 0
+                result.append(
+                    "{:<5} {:<15} {:<15} {:<15} {:.1f}%".format(
+                        drive,
+                        format_bytes(size),
+                        format_bytes(free),
+                        format_bytes(used),
+                        pct_used,
+                    )
+                )
+            except (ValueError, IndexError):
+                continue
+    return result
+
+
 @click.group(name="disk")
 @click.pass_context
 def disk_cmd(ctx):
@@ -47,32 +78,7 @@ def disk_usage():
     elif system == "windows":
         disks = run_command("wmic logicaldisk get size,freespace,caption")
         if "Caption" in disks:
-            lines = disks.split("\n")
-            result = [
-                "{:<5} {:<15} {:<15} {:<15} {:<10}".format(
-                    "Drive", "Total Space", "Free Space", "Used Space", "% Used"
-                )
-            ]
-            for line in lines[1:]:
-                parts = line.strip().split()
-                if len(parts) >= 3:
-                    drive = parts[0]
-                    try:
-                        size = int(parts[1])
-                        free = int(parts[2])
-                        used = size - free
-                        pct_used = (used / size) * 100 if size > 0 else 0
-                        result.append(
-                            "{:<5} {:<15} {:<15} {:<15} {:.1f}%".format(
-                                drive,
-                                format_bytes(size),
-                                format_bytes(free),
-                                format_bytes(used),
-                                pct_used,
-                            )
-                        )
-                    except (ValueError, IndexError):
-                        continue
+            result = parse_windows_disk_info(disks)
             click.echo("\n".join(result))
         else:
             click.echo(disks)
@@ -114,31 +120,7 @@ def disk_list():
             disk_list = [line for line in lines[1:] if line.strip()]
             click.echo(f"Number of logical disks: {len(disk_list)}")
             click.echo("Disk capacities:")
-            result = [
-                "{:<5} {:<15} {:<15} {:<15} {:<10}".format(
-                    "Drive", "Total Space", "Free Space", "Used Space", "% Used"
-                )
-            ]
-            for line in disk_list:
-                parts = line.strip().split()
-                if len(parts) >= 3:
-                    drive = parts[0]
-                    try:
-                        size = int(parts[1])
-                        free = int(parts[2])
-                        used = size - free
-                        pct_used = (used / size) * 100 if size > 0 else 0
-                        result.append(
-                            "{:<5} {:<15} {:<15} {:<15} {:.1f}%".format(
-                                drive,
-                                format_bytes(size),
-                                format_bytes(free),
-                                format_bytes(used),
-                                pct_used,
-                            )
-                        )
-                    except (ValueError, IndexError):
-                        continue
+            result = parse_windows_disk_info(disks)
             click.echo("\n".join(result))
         else:
             click.echo(disks)

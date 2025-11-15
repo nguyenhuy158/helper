@@ -35,6 +35,7 @@ helper [command]
 | `run`   | Run command snippets              | `helper run`         |
 | `kill`  | Kill processes by name or port    | `helper kill <name>` |
 | `disk`  | Show disk usage, mount, and list info | `helper disk usage`  |
+| `journalctl` | Show useful journalctl options and examples | `helper journalctl` |
 | `all`   | Show all info                     | `helper all`         |
 
 Use `-v` for verbose output (e.g., `helper ip -v`).

@@ -21,6 +21,7 @@ from .commands import (
     run_cmd,
     kill,
     disk,
+    journalctl,
 )
 
 
@@ -75,6 +76,7 @@ cli.add_command(env_cmd, name="env")
 cli.add_command(run_cmd, name="run")
 cli.add_command(kill.kill, name="kill")
 cli.add_command(disk.disk(), name="disk")
+cli.add_command(journalctl.journalctl(), name="journalctl")
 
 
 # Register the all command

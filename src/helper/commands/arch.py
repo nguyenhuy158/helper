@@ -4,6 +4,12 @@ import subprocess
 import click
 
 
+from rich.console import Console
+from rich.panel import Panel
+
+console = Console()
+
+
 def get_arch():
     """Get system architecture information."""
     cmd = "uname -m"
@@ -28,5 +34,4 @@ def arch():
         arm64
     """
     result = get_arch()
-    print("$ uname -m")
-    print(result)
+    console.print(Panel(result, title="$ uname -m", border_style="magenta"))

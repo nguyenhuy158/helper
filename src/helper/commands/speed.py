@@ -2,6 +2,11 @@
 
 import click
 import speedtest
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+
+console = Console()
 
 
 def format_speed(speed_bps):
@@ -47,33 +52,32 @@ def speed(simple):
     This command tests your internet connection's download and upload speeds
     using the speedtest.net service through the Python speedtest-cli library.
     """
-    result = get_speed()
+    with console.status("[bold green]Running speed test..."):
+        result = get_speed()
+
     if "error" in result:
-        click.echo(result["error"], err=True)
+        console.print(f"[red]{result['error']}[/red]")
         return 1
 
-    click.echo("Finding best server...")
-    click.echo(f"Testing from {result['client']['isp']} " f"({result['client']['ip']})")
-    click.echo(
-        f"Hosted by {result['server']['name']} ({result['server']['country']}) [{result['server']['d']:.2f} km]"
-    )
-
-    click.echo("Testing download speed...")
-    click.echo("Testing upload speed...")
+    client_info = f"Testing from {result['client']['isp']} ({result['client']['ip']})"
 
     ping = result["ping"]
     download_speed = result["download"]
     upload_speed = result["upload"]
 
     if simple:
-        click.echo(f"Ping: {ping:.2f} ms")
-        click.echo(f"Download: {format_speed(download_speed)}")
-        click.echo(f"Upload: {format_speed(upload_speed)}")
+        console.print(f"Ping: [yellow]{ping:.2f} ms[/yellow]")
+        console.print(f"Download: [green]{format_speed(download_speed)}[/green]")
+        console.print(f"Upload: [blue]{format_speed(upload_speed)}[/blue]")
     else:
-        click.echo("\n=== Speed Test Results ===")
-        click.echo(f"{'Ping:':<12} {ping:>8.2f} ms")
-        click.echo(f"{'Download:':<12} {format_speed(download_speed):>8}")
-        click.echo(f"{'Upload:':<12} {format_speed(upload_speed):>8}")
+        table = Table(title="Speed Test Results", box=None)
+        table.add_column("Metric", style="cyan")
+        table.add_column("Value", style="bold")
+        table.add_row("Ping", f"{ping:.2f} ms")
+        table.add_row("Download", format_speed(download_speed))
+        table.add_row("Upload", format_speed(upload_speed))
+
+        console.print(Panel(table, title="Speed Test", border_style="green", subtitle=client_info))
 
     return 0
 

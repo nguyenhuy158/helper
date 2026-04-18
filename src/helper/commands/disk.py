@@ -4,8 +4,12 @@ import platform
 import subprocess
 
 import click
+from rich.console import Console
+from rich.panel import Panel
 
 from ..utils import format_bytes
+
+console = Console()
 
 
 def run_command(cmd):
@@ -54,21 +58,21 @@ def disk_cmd(ctx):
 def disk_usage():
     """Display disk usage information."""
     output = get_usage()
-    click.echo(output)
+    console.print(Panel(output, title="Disk Usage", border_style="cyan"))
 
 
 @disk_cmd.command(name="mount")
 def disk_mount():
     """Display mounted filesystems."""
     output = get_mount()
-    click.echo(output)
+    console.print(Panel(output, title="Mounted Filesystems", border_style="green"))
 
 
 @disk_cmd.command(name="list")
 def disk_list():
     """List disks and their capacities."""
     output = get_list()
-    click.echo(output)
+    console.print(Panel(output, title="Disk List", border_style="blue"))
 
 
 def get_usage():

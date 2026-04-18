@@ -2,6 +2,10 @@
 
 import subprocess
 import click
+from rich.console import Console
+from rich.panel import Panel
+
+console = Console()
 
 
 def get_public_ip():
@@ -28,5 +32,4 @@ def public_ip():
     Note: Requires an active internet connection. Uses ifconfig.me service by default.
     """
     result = get_public_ip()
-    print("$ curl -s ifconfig.me")
-    print(result)
+    console.print(Panel(result, title="$ curl -s ifconfig.me", border_style="green"))

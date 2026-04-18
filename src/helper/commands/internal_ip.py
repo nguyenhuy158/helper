@@ -5,6 +5,10 @@ import socket
 import shutil
 import subprocess
 import click
+from rich.console import Console
+from rich.panel import Panel
+
+console = Console()
 
 
 def get_internal_ip():
@@ -47,4 +51,4 @@ def internal_ip():
     """
     ip = get_internal_ip()
     if ip:
-        click.echo(ip)
+        console.print(Panel(ip, title="Internal IP", border_style="blue"))

@@ -4,8 +4,13 @@ import platform
 import subprocess
 
 import click
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
 
 from ..utils import format_bytes
+
+console = Console()
 
 
 def run_command(cmd):
@@ -296,49 +301,47 @@ def system_info():
     info = get_info()
 
     if not info:
-        click.echo("Unsupported operating system")
+        console.print("[red]Unsupported operating system[/red]")
         return
 
     # System Information
-    click.echo("=" * 40 + " System Information " + "=" * 40)
-    click.echo(f"System: {info['system']['system']} {info['system']['release']}")
-    click.echo(f"Node Name: {info['system']['node']}")
-    click.echo(f"Machine: {info['system']['machine']}")
-    click.echo(f"Processor: {info['system']['processor']}")
+    table = Table(title="System Information", show_header=False, box=None)
+    table.add_row("System", f"{info['system']['system']} {info['system']['release']}")
+    table.add_row("Node Name", info["system"]["node"])
+    table.add_row("Machine", info["system"]["machine"])
+    table.add_row("Processor", info["system"]["processor"])
+    console.print(Panel(table, border_style="blue"))
 
-    # OS Version
-    click.echo("\n" + "=" * 40 + " OS Version " + "=" * 40)
-    click.echo(info["os_version"])
-
-    # Uptime
-    click.echo("\n" + "=" * 40 + " Uptime " + "=" * 40)
-    click.echo(info["uptime"])
+    # OS Version & Uptime
+    table = Table(show_header=False, box=None)
+    table.add_row("OS Version", info["os_version"])
+    table.add_row("Uptime", info["uptime"])
+    console.print(Panel(table, title="OS & Uptime", border_style="green"))
 
     # CPU Information
-    click.echo("\n" + "=" * 40 + " CPU Info " + "=" * 40)
-    click.echo(f"CPU Cores: {info['cpu']['cores']}")
-
+    table = Table(title="CPU Info", show_header=False, box=None)
+    table.add_row("Cores", info["cpu"]["cores"])
     if "cpu" in info["cpu"]:
-        click.echo(f"CPU: {info['cpu']['cpu']}")
-
+        table.add_row("Model", info["cpu"]["cpu"])
     if "load_avg" in info["cpu"]:
-        click.echo(f"Load Average: {info['cpu']['load_avg']}")
+        table.add_row("Load Average", info["cpu"]["load_avg"])
+    console.print(Panel(table, border_style="magenta"))
 
     # Memory Information
-    click.echo("\n" + "=" * 40 + " Memory Information " + "=" * 40)
     if isinstance(info["memory"], dict):
-        click.echo(
-            f"Total: {info['memory']['total']}\n"
-            f"Used:  {info['memory']['used']}\n"
-            f"Free:  {info['memory']['free']}\n"
-            f"Usage: {info['memory']['usage']}"
-        )
+        table = Table(title="Memory Information", box=None)
+        table.add_column("Type", style="cyan")
+        table.add_column("Value", style="bold")
+        table.add_row("Total", info["memory"]["total"])
+        table.add_row("Used", info["memory"]["used"])
+        table.add_row("Free", info["memory"]["free"])
+        table.add_row("Usage", info["memory"]["usage"])
+        console.print(Panel(table, border_style="yellow"))
     else:
-        click.echo(info["memory"])
+        console.print(Panel(info["memory"], title="Memory Information", border_style="yellow"))
 
     # Disk Information
-    click.echo("\n" + "=" * 40 + " Disk Information " + "=" * 40)
-    click.echo(info["disks"])
+    console.print(Panel(info["disks"], title="Disk Information", border_style="cyan"))
 
 
 # Add aliases for the command

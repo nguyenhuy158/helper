@@ -5,11 +5,10 @@ version retrieval, and command-line interface. Tests cover both detection
 logic and error handling for non-NixOS systems.
 """
 
-import pytest
 import subprocess
 from unittest.mock import patch, MagicMock
 
-from helper.commands.nixos import check_nixos, get_nixos_version, nixos
+from helper.commands.nixos import check_nixos, get_nixos_version
 
 
 class TestCheckNixos:

@@ -1,7 +1,6 @@
-import subprocess
-
 """Public IP address commands."""
 
+import subprocess
 import click
 
 

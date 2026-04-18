@@ -1,8 +1,7 @@
-import click
-
 """Journalctl log commands."""
 
 import platform
+import click
 
 
 @click.command(name="journalctl")

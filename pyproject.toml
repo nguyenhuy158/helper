@@ -1,10 +1,10 @@
 [project]
 name = "helper-cli"
-version = "0.2.1"
+dynamic = ["version"]
 description = "Simple system info CLI"
 readme = "README.md"
 requires-python = ">=3.8"
-license = "GPL-3.0-or-later"
+license = { text = "GPL-3.0-or-later" }
 authors = [
     { name = "Huy Nguyen", email = "huy.ntq02@gmail.com" }
 ]
@@ -20,38 +20,37 @@ classifiers = [
 ]
 dependencies = [
     "click>=8.0.0",
-    "speedtest-cli>=2.1.0"
-]
-
-[project.optional-dependencies]
-dev = [
-    "black>=22.0.0",
-    "pylint>=2.0.0",
-    "pytest>=7.0.0",
-    "pytest-mock>=3.0.0",
-    "watchdog>=2.0.0",
+    "speedtest-cli>=2.1.0",
     "psutil>=5.0.0",
     "pyyaml>=6.0",
     "tabulate>=0.9.0"
 ]
 
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "pytest>=7.0.0",
+    "pytest-mock>=3.0.0",
+    "watchdog>=2.0.0"
+]
+
 [project.urls]
 Homepage = "https://github.com/nguyenhuy158/helper"
-Documentation = "https://nguyenhuy158.github.io/helper/helper.html"
 Repository = "https://github.com/nguyenhuy158/helper"
 
 [project.scripts]
 helper = "helper.main:cli"
 h = "helper.main:cli"
 
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["helper*"]
+where = ["src"]
 
-[tool.black]
+[tool.setuptools.dynamic]
+version = {file = ["VERSION"]}
+
+[tool.ruff]
 line-length = 100
-
-[tool.pdoc]
-modules = ["helper"]
-output_dir = "docs"
-docformat = "google"

@@ -1,8 +1,9 @@
+"""Main entry point for the helper CLI application."""
+
 import logging
 
 import click
 
-"""Main entry point for the helper CLI application."""
 from . import __version__
 from .env_manager import load_env
 from .commands import (

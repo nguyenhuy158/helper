@@ -5,11 +5,10 @@ operating systems. Tests cover CPU, memory, disk, and OS information retrieval,
 command execution, and CLI output formatting.
 """
 
-import pytest
 import subprocess
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-from helper.commands.system_info import get_info, system_info, run_command
+from helper.commands.system_info import get_info, run_command
 
 
 class TestRunCommand:

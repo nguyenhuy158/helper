@@ -1,7 +1,6 @@
-import click
-
 """Rsync file synchronization commands for the helper CLI."""
 
+import click
 import subprocess
 import sys
 

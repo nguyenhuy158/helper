@@ -5,10 +5,9 @@ environment detection, activation, deactivation, and command-line interface.
 Tests cover various scenarios like missing environments and path resolution.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-from helper.commands.venv import find_virtualenv, source_virtualenv, deactivate_virtualenv, venv
+from helper.commands.venv import find_virtualenv, source_virtualenv, deactivate_virtualenv
 
 
 class TestFindVirtualenv:

@@ -1,7 +1,6 @@
-import platform
-
 """Internal IP address commands."""
 
+import platform
 import socket
 import shutil
 import subprocess

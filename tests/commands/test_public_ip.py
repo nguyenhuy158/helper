@@ -4,11 +4,10 @@ This module tests public/external IP address retrieval using external services.
 Tests cover successful IP fetching, network error handling, and CLI command output.
 """
 
-import pytest
 import subprocess
 from unittest.mock import patch
 
-from helper.commands.public_ip import get_public_ip, public_ip
+from helper.commands.public_ip import get_public_ip
 
 
 class TestGetPublicIP:

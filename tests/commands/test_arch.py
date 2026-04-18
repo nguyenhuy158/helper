@@ -5,11 +5,10 @@ including both unit tests for the get_arch function and integration tests for th
 Tests cover successful execution, error handling, and command output formatting.
 """
 
-import pytest
 import subprocess
 from unittest.mock import patch
 
-from helper.commands.arch import get_arch, arch
+from helper.commands.arch import get_arch
 
 
 class TestGetArch:

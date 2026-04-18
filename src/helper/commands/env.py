@@ -1,10 +1,9 @@
 """Environment variable management commands."""
 
 import os
-from pathlib import Path
 
 import click
-from ..env_manager import get_env, set_env, load_env, CONFIG_DIR, ENV_FILE
+from ..env_manager import set_env, load_env, CONFIG_DIR, ENV_FILE
 
 
 @click.group(name="env", help="Manage environment variables.")

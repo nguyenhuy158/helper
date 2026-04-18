@@ -1,7 +1,6 @@
-import click
-
 """Speed test commands."""
 
+import click
 import speedtest
 
 

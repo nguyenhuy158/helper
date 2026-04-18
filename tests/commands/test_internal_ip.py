@@ -5,11 +5,10 @@ covering different operating systems (macOS, Linux) and error scenarios.
 Tests include both function-level and command-level testing.
 """
 
-import pytest
 import subprocess
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-from helper.commands.internal_ip import get_internal_ip, internal_ip
+from helper.commands.internal_ip import get_internal_ip
 
 
 class TestGetInternalIP:

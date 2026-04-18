@@ -1,9 +1,9 @@
-import click
-
 """System information commands."""
 
 import platform
 import subprocess
+
+import click
 
 from ..utils import format_bytes
 

@@ -13,6 +13,7 @@ console = Console()
 
 REPO = "nguyenhuy158/odoo-scripts"
 API_URL = f"https://api.github.com/repos/{REPO}/contents/scripts"
+CATALOG_URL = f"https://api.github.com/repos/{REPO}/contents/catalog.json"
 
 
 def _request(url, raw=False):
@@ -33,6 +34,18 @@ def list_scripts():
     return [e for e in entries if e["type"] == "file" and e["name"].endswith(".py")]
 
 
+def get_catalog():
+    """Fetch catalog.json metadata (category/description/output per script).
+
+    Returns an empty dict when the catalog is missing or unreadable so the
+    command still works from the bare file listing.
+    """
+    try:
+        return json.loads(_request(CATALOG_URL, raw=True))
+    except (urllib.error.URLError, ValueError, OSError):
+        return {}
+
+
 def download_script(script, dest_dir="."):
     """Download one script entry to dest_dir, return the written path."""
     content = _request(script["url"], raw=True)
@@ -51,6 +64,13 @@ def _first_doc_line(script):
 @click.command()
 @click.argument("name", required=False)
 @click.option(
+    "--search",
+    "-s",
+    "search",
+    default=None,
+    help="Filter the menu by keyword (matches name, category, description).",
+)
+@click.option(
     "--dir",
     "-d",
     "dest_dir",
@@ -58,19 +78,21 @@ def _first_doc_line(script):
     type=click.Path(file_okay=False),
     help="Directory to save the script into (prompted if omitted, default: current dir).",
 )
-def odoo(name, dest_dir):
+def odoo(name, search, dest_dir):
     """Browse and download click-odoo scripts.
 
-    Lists the scripts available in the odoo-scripts repository,
-    downloads the selected one, then you run it yourself with
-    click-odoo. After selecting, you are asked where to save the
-    file (default: current directory).
+    Lists the scripts available in the odoo-scripts repository with
+    category and description, downloads the selected one, then you
+    run it yourself with click-odoo. After selecting, you are asked
+    where to save the file (default: current directory).
 
-    NAME optionally skips the menu and downloads that script directly.
+    NAME downloads that script directly when it matches exactly;
+    otherwise it filters the menu like --search does.
 
     Example:
         $ h odoo
         $ h odoo list_users
+        $ h odoo -s filestore
         $ h odoo list_users --dir ~/scripts
     """
     try:
@@ -92,21 +114,43 @@ def odoo(name, dest_dir):
         console.print("No scripts found in the repository.")
         return
 
+    catalog = get_catalog()
+
+    selected = None
     if name:
         wanted = name if name.endswith(".py") else f"{name}.py"
         selected = next((s for s in scripts if s["name"] == wanted), None)
-        if selected is None:
-            console.print(f"[red]No script named '{wanted}'.[/red] Available:")
-            for s in scripts:
-                console.print(f"  - {s['name']}")
-            raise SystemExit(1)
-    else:
-        table = Table(title=f"📜 Scripts in {REPO}", border_style="magenta")
+
+    if selected is None:
+        term = (search or name or "").lower()
+        if term:
+            scripts = [
+                s
+                for s in scripts
+                if term in s["name"].lower()
+                or term in catalog.get(s["name"], {}).get("category", "").lower()
+                or term in catalog.get(s["name"], {}).get("description", "").lower()
+            ]
+            if not scripts:
+                console.print(f"[red]No script matches '{term}'.[/red]")
+                raise SystemExit(1)
+
+        title = f"📜 Scripts in {REPO}" + (f" — filter: '{term}'" if term else "")
+        table = Table(title=title, border_style="magenta")
         table.add_column("#", justify="right", style="bold")
         table.add_column("Name", style="cyan")
+        table.add_column("Catg", style="yellow")
+        table.add_column("Description")
         table.add_column("Size", justify="right")
         for i, s in enumerate(scripts, start=1):
-            table.add_row(str(i), s["name"], _first_doc_line(s))
+            meta = catalog.get(s["name"], {})
+            table.add_row(
+                str(i),
+                s["name"],
+                meta.get("category", "-"),
+                meta.get("description", "-"),
+                _first_doc_line(s),
+            )
         console.print(table)
 
         choice = click.prompt(
@@ -136,3 +180,6 @@ def odoo(name, dest_dir):
     console.print(f"[green]Saved[/green] {dest}")
     console.print("Run it with:")
     console.print(f"  [bold]click-odoo -c odoo.conf -d <db> {dest}[/bold]")
+    output_example = catalog.get(selected["name"], {}).get("output")
+    if output_example:
+        console.print(f"Output: [dim]{output_example}[/dim]")

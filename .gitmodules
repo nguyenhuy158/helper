@@ -1,0 +1,15 @@
+[submodule "tools/pgslim"]
+	path = tools/pgslim
+	url = https://github.com/nguyenhuy158/pgslim.git
+[submodule "tools/superclean"]
+	path = tools/superclean
+	url = https://github.com/nguyenhuy158/superclean.git
+[submodule "tools/chillguy"]
+	path = tools/chillguy
+	url = https://github.com/nguyenhuy158/chillguy.git
+[submodule "tools/docxlint"]
+	path = tools/docxlint
+	url = https://github.com/nguyenhuy158/docxlint.git
+[submodule "tools/graphql-compare"]
+	path = tools/graphql-compare
+	url = https://github.com/nguyenhuy158/graphql-compare.git

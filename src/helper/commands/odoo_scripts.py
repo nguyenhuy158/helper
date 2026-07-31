@@ -55,6 +55,30 @@ def download_script(script, dest_dir="."):
     return dest
 
 
+def _prompt_dest_dir():
+    """Pick a destination directory from a menu, or type a custom path.
+
+    Lists the current directory and its (non-hidden) subdirectories as
+    numbered choices; any other input is used as a path directly.
+    """
+    subdirs = sorted(d for d in os.listdir(".") if os.path.isdir(d) and not d.startswith("."))[:9]
+
+    console.print("Save to:")
+    console.print("  [bold cyan]1[/bold cyan]  [dim].[/dim] (current directory)")
+    for i, d in enumerate(subdirs, start=2):
+        console.print(f"  [bold cyan]{i}[/bold cyan]  {d}/")
+    console.print("  [dim]…or type a path (e.g. migration, ~/scripts)[/dim]")
+
+    raw = click.prompt("Directory", default="1", show_default=False).strip()
+    if raw.isdigit():
+        n = int(raw)
+        if n == 1:
+            return "."
+        if 2 <= n <= len(subdirs) + 1:
+            return subdirs[n - 2]
+    return raw or "."
+
+
 def _first_doc_line(script):
     """Best-effort short description: repo API has no docstring, keep size instead."""
     size = script.get("size", 0)
@@ -162,11 +186,7 @@ def odoo(name, search, dest_dir):
         selected = scripts[choice - 1]
 
     if dest_dir is None:
-        dest_dir = click.prompt(
-            "Save to directory",
-            default=".",
-            type=click.Path(file_okay=False),
-        )
+        dest_dir = _prompt_dest_dir()
     dest_dir = os.path.expanduser(dest_dir)
     os.makedirs(dest_dir, exist_ok=True)
 

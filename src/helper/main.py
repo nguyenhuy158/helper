@@ -1,5 +1,6 @@
 """Main entry point for the helper CLI application."""
 
+import importlib
 import logging
 
 import click
@@ -8,32 +9,37 @@ from rich.panel import Panel
 from rich.table import Table
 
 from . import __version__
-from .commands import (
-    all_info,
-    arch,
-    disk,
-    docker,
-    env_cmd,
-    file,
-    internal_ip,
-    journalctl,
-    kill,
-    nixos,
-    odoo_scripts,
-    public_ip,
-    rsync,
-    run_cmd,
-    speed,
-    system_info,
-    tools,
-    venv,
-    verbosity,
-)
+from .commands import verbosity
 from .env_manager import load_env
 
 # Import verbosity classes from the verbosity module
 VerbosityCommand = verbosity.VerbosityCommand
 VerbosityGroup = verbosity.VerbosityGroup
+
+# Commands are loaded lazily so startup doesn't import heavy modules
+# (psutil, speedtest, ...) until the command actually runs.
+# name -> (module, attribute); the attribute is a click command or a
+# zero-arg factory returning one.
+LAZY_COMMANDS = {
+    "ip": ("helper.commands.internal_ip", "internal_ip"),
+    "pubip": ("helper.commands.public_ip", "public_ip"),
+    "arch": ("helper.commands.arch", "arch"),
+    "nix": ("helper.commands.nixos", "nixos"),
+    "d": ("helper.commands.docker", "docker"),
+    "sp": ("helper.commands.speed", "speed"),
+    "si": ("helper.commands.system_info", "system_info"),
+    "v": ("helper.commands.venv", "venv"),
+    "f": ("helper.commands.file", "file"),
+    "env": ("helper.commands.env", "env"),
+    "run": ("helper.commands.run", "run"),
+    "kill": ("helper.commands.kill", "kill"),
+    "disk": ("helper.commands.disk", "disk"),
+    "journalctl": ("helper.commands.journalctl", "journalctl"),
+    "rsync": ("helper.commands.rsync", "rsync"),
+    "tools": ("helper.commands.tools", "tools"),
+    "odoo": ("helper.commands.odoo_scripts", "odoo"),
+    "all": ("helper.commands.all_info", "all_command"),
+}
 
 COMMAND_CATEGORIES = {
     "System": ["si", "arch", "env", "v", "nix", "all"],
@@ -47,7 +53,24 @@ COMMAND_CATEGORIES = {
 
 
 class HelperGroup(VerbosityGroup):
-    """Group with a rich, categorized help screen."""
+    """Group with lazy command loading and a rich, categorized help screen."""
+
+    def list_commands(self, ctx):
+        return sorted(set(super().list_commands(ctx)) | set(LAZY_COMMANDS))
+
+    def get_command(self, ctx, name):
+        cmd = super().get_command(ctx, name)
+        if cmd is not None:
+            return cmd
+        spec = LAZY_COMMANDS.get(name)
+        if spec is None:
+            return None
+        module_path, attr = spec
+        obj = getattr(importlib.import_module(module_path), attr)
+        if not isinstance(obj, click.BaseCommand):
+            obj = obj()
+        self.add_command(obj, name=name)
+        return obj
 
     def format_help(self, ctx, formatter):
         console = Console()
@@ -123,31 +146,6 @@ def cli():
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         level=logging.ERROR,
     )
-
-
-# Register all commands
-# Keep only short versions of commands where duplicates exist
-cli.add_command(internal_ip.internal_ip, name="ip")
-cli.add_command(public_ip.public_ip, name="pubip")
-cli.add_command(arch.arch, name="arch")
-cli.add_command(nixos.nixos, name="nix")
-cli.add_command(docker.docker, name="d")
-cli.add_command(speed.speed, name="sp")
-cli.add_command(system_info.system_info, name="si")
-cli.add_command(venv.venv, name="v")
-cli.add_command(file.file(), name="f")
-cli.add_command(env_cmd, name="env")
-cli.add_command(run_cmd, name="run")
-cli.add_command(kill.kill, name="kill")
-cli.add_command(disk.disk(), name="disk")
-cli.add_command(journalctl.journalctl(), name="journalctl")
-cli.add_command(rsync.rsync, name="rsync")
-cli.add_command(tools.tools, name="tools")
-cli.add_command(odoo_scripts.odoo, name="odoo")
-
-
-# Register the all command
-all_info.register_all_command(cli)
 
 
 if __name__ == "__main__":

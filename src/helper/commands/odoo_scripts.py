@@ -3,29 +3,18 @@
 import json
 import os
 import urllib.error
-import urllib.request
 
 import click
 from rich.console import Console
 from rich.table import Table
+
+from ..gh import fetch as _request
 
 console = Console()
 
 REPO = "nguyenhuy158/odoo-scripts"
 API_URL = f"https://api.github.com/repos/{REPO}/contents/scripts"
 CATALOG_URL = f"https://api.github.com/repos/{REPO}/contents/catalog.json"
-
-
-def _request(url, raw=False):
-    """Fetch a GitHub API URL, using GITHUB_TOKEN/GH_TOKEN when available."""
-    accept = "application/vnd.github.raw" if raw else "application/vnd.github+json"
-    headers = {"Accept": accept, "User-Agent": "helper-cli"}
-    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    req = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        return resp.read()
 
 
 def list_scripts():

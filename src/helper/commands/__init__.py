@@ -1,7 +1,5 @@
-"""Helper CLI commands package."""
+"""Helper CLI commands package.
 
-# Initialize commands package
-from .env import env as env_cmd
-from .run import run as run_cmd
-
-__all__ = ["env_cmd", "run_cmd"]
+Command modules are imported lazily by the CLI (see main.LAZY_COMMANDS)
+so this package intentionally imports nothing at load time.
+"""

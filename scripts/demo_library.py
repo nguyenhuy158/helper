@@ -7,8 +7,8 @@ This script demonstrates how to use helper functions programmatically.
 import os
 import sys
 
-# Add current directory to path for development testing
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add src/ to path for development testing (run from repo without install)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import helper
 

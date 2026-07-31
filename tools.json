@@ -1,0 +1,44 @@
+[
+  {
+    "name": "helper-cli",
+    "description": "Quick system info CLI (this tool)",
+    "install": "uv tool install helper-cli",
+    "repo": "https://github.com/nguyenhuy158/helper"
+  },
+  {
+    "name": "pgslim",
+    "description": "Reduce PostgreSQL dump size by nullifying large bytea/text columns",
+    "install": "pip install pgslim",
+    "repo": "https://github.com/nguyenhuy158/pgslim"
+  },
+  {
+    "name": "superclean",
+    "description": "Clean development caches and reclaim disk space (sclean)",
+    "install": "pip install superclean",
+    "repo": "https://github.com/nguyenhuy158/superclean"
+  },
+  {
+    "name": "chillguy",
+    "description": "Terminal-based YouTube music player (requires mpv)",
+    "install": "pip install chillguy",
+    "repo": "https://github.com/nguyenhuy158/chillguy"
+  },
+  {
+    "name": "docxlint",
+    "description": "Validate Jinja2 template syntax inside .docx files (docxtpl)",
+    "install": "pip install docxlint",
+    "repo": "https://github.com/nguyenhuy158/docxlint"
+  },
+  {
+    "name": "odoo-scripts",
+    "description": "Collection of scripts runnable with click-odoo",
+    "install": "pip install click-odoo + clone repo",
+    "repo": "https://github.com/nguyenhuy158/odoo-scripts"
+  },
+  {
+    "name": "graphql-compare",
+    "description": "Compare GraphQL responses between environments (Docker app)",
+    "install": "git clone + docker compose up",
+    "repo": "https://github.com/nguyenhuy158/graphql-compare"
+  }
+]

@@ -1,12 +1,20 @@
 """Tools command for helper CLI - showcase other tools by the same author."""
 
+import json
+
 import click
 from rich.console import Console
 from rich.table import Table
 
+from ..gh import fetch as _request
+
 console = Console()
 
-TOOLS = [
+TOOLS_URL = "https://api.github.com/repos/nguyenhuy158/helper/contents/tools.json?ref=pypi"
+
+# Fallback when tools.json can't be fetched (offline, rate limit, ...).
+# The live list is maintained in tools.json at the repo root.
+FALLBACK_TOOLS = [
     {
         "name": "helper-cli",
         "description": "Quick system info CLI (this tool)",
@@ -53,8 +61,15 @@ TOOLS = [
 
 
 def get_tools():
-    """Return the list of tools to showcase."""
-    return TOOLS
+    """Return the list of tools to showcase.
+
+    Fetches tools.json from the helper repository so new tools appear
+    without a release; falls back to the built-in list when offline.
+    """
+    try:
+        return json.loads(_request(TOOLS_URL, raw=True))
+    except Exception:
+        return FALLBACK_TOOLS
 
 
 @click.command()

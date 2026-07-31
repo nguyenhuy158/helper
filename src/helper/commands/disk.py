@@ -34,8 +34,9 @@ def parse_windows_disk_info(disks_output):
         if len(parts) >= 3:
             drive = parts[0]
             try:
-                size = int(parts[1])
-                free = int(parts[2])
+                # wmic prints columns alphabetically: Caption, FreeSpace, Size
+                free = int(parts[1])
+                size = int(parts[2])
                 used = size - free
                 pct_used = (used / size) * 100 if size > 0 else 0
                 result.append(

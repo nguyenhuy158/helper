@@ -10,6 +10,8 @@ import sys
 
 import click
 
+from ..rich_help import RichHelpGroup
+
 
 def find_virtualenv(path=None):
     """Find virtual environment in the given path or current directory.
@@ -93,7 +95,7 @@ def deactivate_virtualenv():
     click.echo("# Virtual environment deactivated", err=True)
 
 
-@click.group()
+@click.group(cls=RichHelpGroup)
 def venv():
     """Manage Python virtual environments."""
 

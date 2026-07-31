@@ -7,6 +7,8 @@ Split by concern:
 - images:      rmi
 - urls:        url (containers with their HTTP/HTTPS URLs)
 - maintenance: clean, disk-used
+- dashboard:   full-screen Textual dashboard (`h d` / `h d ui`), optional
+               'textual' dependency — imported lazily, never at package import
 
 Importing this package registers every subcommand on the group.
 """

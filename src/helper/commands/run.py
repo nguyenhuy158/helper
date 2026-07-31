@@ -6,6 +6,7 @@ import sys
 
 import click
 
+from ..rich_help import RichHelpGroup
 from ..snippets import (
     add_snippet,
     get_snippet_command,
@@ -27,7 +28,7 @@ def _get_snippet_by_index_or_name(snippet_name, snippets_list):
     return snippet_name if snippet_name in snippets_list else None
 
 
-@click.group(name="run", help="Run predefined command snippets.")
+@click.group(name="run", cls=RichHelpGroup, help="Run predefined command snippets.")
 def run():
     """Run predefined command snippets.
 

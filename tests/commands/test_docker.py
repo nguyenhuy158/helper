@@ -51,3 +51,33 @@ class TestDockerCommand:
         assert "url" in docker_group.commands
         assert "-parse-port-string" not in docker_group.commands
         assert set(docker_group.commands) >= {"ps", "run", "rm", "rmi", "url", "clean", "disk-used"}
+
+    def test_ui_subcommand_registered(self, cli_app):
+        """Test that the dashboard ui subcommand exists on the group."""
+        import click
+
+        runner, cli = cli_app
+        ctx = click.Context(cli)
+
+        docker_group = cli.get_command(ctx, "d")
+
+        assert "ui" in docker_group.commands
+
+    def test_group_invokes_without_subcommand(self, cli_app):
+        """Bare `h d` must not error out with 'Missing command'."""
+        import click
+
+        runner, cli = cli_app
+        ctx = click.Context(cli)
+
+        docker_group = cli.get_command(ctx, "d")
+
+        assert docker_group.invoke_without_command is True
+
+    def test_dashboard_import_is_lazy(self):
+        """Importing the docker package must not import textual."""
+        import sys
+
+        import helper.commands.docker  # noqa: F401
+
+        assert "helper.commands.docker.dashboard" not in sys.modules

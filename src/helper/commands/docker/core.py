@@ -1,20 +1,12 @@
 """Shared docker helpers: verbosity, docker availability, port inspection."""
 
 import json
-import logging
 import subprocess
-import sys
 from typing import Dict, List
 
 import click
 
-# Configure logging
-logging.basicConfig(
-    level=logging.WARNING,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    stream=sys.stderr,
-)
-logger = logging.getLogger("docker-helper")
+from ...log import logger, set_level
 
 
 class Verbosity:
@@ -26,33 +18,26 @@ class Verbosity:
 
     def set_level(self):
         """Set logging level based on verbosity."""
-        if self.verbosity >= 3:
-            logger.setLevel(logging.DEBUG)
-        elif self.verbosity == 2:
-            logger.setLevel(logging.INFO)
-        elif self.verbosity == 1:
-            logger.setLevel(logging.WARNING)
-        else:
-            logger.setLevel(logging.ERROR)
+        set_level(self.verbosity)
 
-    def debug(self, msg: str, *args, **kwargs):
-        """Log debug message if verbosity >= 3."""
-        if self.verbosity >= 3:
-            logger.debug(msg, *args, **kwargs)
+    def _log(self, level: str, msg: str, exc_info: bool = False):
+        logger.opt(exception=bool(exc_info), depth=2).log(level, msg)
 
-    def info(self, msg: str, *args, **kwargs):
-        """Log info message if verbosity >= 2."""
-        if self.verbosity >= 2:
-            logger.info(msg, *args, **kwargs)
+    def debug(self, msg: str, exc_info: bool = False):
+        """Log debug message (shown when verbosity >= 3)."""
+        self._log("DEBUG", msg, exc_info)
 
-    def warning(self, msg: str, *args, **kwargs):
-        """Log warning message if verbosity >= 1."""
-        if self.verbosity >= 1:
-            logger.warning(msg, *args, **kwargs)
+    def info(self, msg: str, exc_info: bool = False):
+        """Log info message (shown when verbosity >= 2)."""
+        self._log("INFO", msg, exc_info)
 
-    def error(self, msg: str, *args, **kwargs):
+    def warning(self, msg: str, exc_info: bool = False):
+        """Log warning message (shown when verbosity >= 1)."""
+        self._log("WARNING", msg, exc_info)
+
+    def error(self, msg: str, exc_info: bool = False):
         """Log error message regardless of verbosity."""
-        logger.error(msg, *args, **kwargs)
+        self._log("ERROR", msg, exc_info)
 
 
 def get_container_ports(container_id: str, verbosity: Verbosity) -> List[Dict]:
@@ -65,7 +50,7 @@ def get_container_ports(container_id: str, verbosity: Verbosity) -> List[Dict]:
     Returns:
         List of dictionaries containing port mappings
     """
-    verbosity.debug("Getting ports for container %s", container_id)
+    verbosity.debug(f"Getting ports for container {container_id}")
     try:
         result = subprocess.run(
             [
@@ -85,7 +70,7 @@ def get_container_ports(container_id: str, verbosity: Verbosity) -> List[Dict]:
 
         ports = []
         raw_output = result.stdout.strip()
-        verbosity.debug("Raw port mappings: %s", raw_output)
+        verbosity.debug(f"Raw port mappings: {raw_output}")
 
         if not raw_output:
             return ports
@@ -96,10 +81,8 @@ def get_container_ports(container_id: str, verbosity: Verbosity) -> List[Dict]:
             try:
                 container_port, host_ip, host_port = mapping.split("|")
                 verbosity.debug(
-                    "Processing mapping: container=%s, host_ip=%s, host_port=%s",
-                    container_port,
-                    host_ip,
-                    host_port,
+                    f"Processing mapping: container={container_port}, "
+                    f"host_ip={host_ip}, host_port={host_port}"
                 )
 
                 if container_port and host_port:
@@ -108,22 +91,21 @@ def get_container_ports(container_id: str, verbosity: Verbosity) -> List[Dict]:
                         "host_ip": (host_ip if host_ip not in ("0.0.0.0", "") else "localhost"),
                         "host_port": host_port,
                     }
-                    verbosity.info("Added port mapping: %s", port_info)
+                    verbosity.info(f"Added port mapping: {port_info}")
                     ports.append(port_info)
                 else:
-                    verbosity.debug("Skipping incomplete mapping: %s", mapping)
+                    verbosity.debug(f"Skipping incomplete mapping: {mapping}")
             except ValueError as e:
-                verbosity.warning("Failed to parse mapping '%s': %s", mapping, e)
+                verbosity.warning(f"Failed to parse mapping '{mapping}': {e}")
 
-        verbosity.debug("Final port mappings: %s", ports)
+        verbosity.debug(f"Final port mappings: {ports}")
         return ports
 
     except subprocess.CalledProcessError as e:
-        verbosity.error("Failed to get container info: %s", e.stderr)
+        verbosity.error(f"Failed to get container info: {e.stderr}")
     except Exception as e:
         verbosity.error(
-            "Unexpected error in get_container_ports: %s",
-            str(e),
+            f"Unexpected error in get_container_ports: {e!s}",
             exc_info=verbosity.verbosity >= 3,
         )
     return []

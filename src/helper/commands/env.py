@@ -5,9 +5,10 @@ import os
 import click
 
 from ..env_manager import CONFIG_DIR, ENV_FILE, load_env, set_env
+from ..rich_help import RichHelpGroup
 
 
-@click.group(name="env", help="Manage environment variables.")
+@click.group(name="env", cls=RichHelpGroup, help="Manage environment variables.")
 def env():
     """Environment variable management commands."""
 

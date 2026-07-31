@@ -7,6 +7,8 @@ import subprocess
 
 import click
 
+from ..rich_help import RichHelpGroup
+
 
 def check_nixos():
     """Check if running on NixOS."""
@@ -38,7 +40,7 @@ def get_nixos_version():
         return "nixos-version command not found"
 
 
-@click.group()
+@click.group(cls=RichHelpGroup)
 def nixos():
     """NixOS related commands."""
     if not check_nixos():

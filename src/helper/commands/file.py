@@ -6,6 +6,8 @@ from typing import Callable, List, Optional, Tuple
 
 import click
 
+from ..rich_help import RichHelpGroup
+
 
 def get_sorted_files(
     directory: str,
@@ -89,7 +91,7 @@ def human_readable_size(size_bytes: int) -> str:
     return f"{size:.1f}{units[unit_idx]}"
 
 
-@click.group(name="file")
+@click.group(name="file", cls=RichHelpGroup)
 @click.option(
     "--directory",
     "-d",

@@ -7,6 +7,7 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
+from ..rich_help import RichHelpGroup
 from ..utils import format_bytes
 
 console = Console()
@@ -48,7 +49,7 @@ def parse_windows_disk_info(disks_output):
     return result
 
 
-@click.group(name="disk")
+@click.group(name="disk", cls=RichHelpGroup)
 @click.pass_context
 def disk_cmd(ctx):
     """Disk management commands."""

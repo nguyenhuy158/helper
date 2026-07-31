@@ -1,9 +1,10 @@
 """Verbosity handling for CLI commands."""
 
-import logging
 import re
 
 import click
+
+from ..log import set_level
 
 
 class VerbosityCommand(click.Command):
@@ -42,15 +43,7 @@ class VerbosityCommand(click.Command):
         Args:
             verbose (int): Verbosity level (0-3)
         """
-        logger = logging.getLogger("docker-helper")
-        if verbose >= 3:
-            logger.setLevel(logging.DEBUG)
-        elif verbose == 2:
-            logger.setLevel(logging.INFO)
-        elif verbose == 1:
-            logger.setLevel(logging.WARNING)
-        else:
-            logger.setLevel(logging.ERROR)
+        set_level(verbose)
 
 
 class VerbosityGroup(click.Group):
@@ -77,14 +70,6 @@ class VerbosityGroup(click.Group):
         ctx.obj["verbosity"] = verbose
 
         # Set up logging
-        logger = logging.getLogger("docker-helper")
-        if verbose >= 3:
-            logger.setLevel(logging.DEBUG)
-        elif verbose == 2:
-            logger.setLevel(logging.INFO)
-        elif verbose == 1:
-            logger.setLevel(logging.WARNING)
-        else:
-            logger.setLevel(logging.ERROR)
+        set_level(verbose)
 
         return ctx

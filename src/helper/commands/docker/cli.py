@@ -1,13 +1,27 @@
 """The docker command group."""
 
-import logging
-
 import click
 
+from ...rich_help import RichHelpGroup
 from .core import Verbosity, check_docker, logger
 
 
-@click.group()
+def _launch_dashboard(ctx):
+    """Launch the full-screen Textual dashboard (optional dependency)."""
+    try:
+        from .dashboard import DockerDashboard
+    except ImportError:
+        click.echo(
+            "Error: the interactive dashboard requires the 'textual' package.\n"
+            "Install it with: uv tool install 'helper-cli[tui]'"
+            "  (or: pip install 'helper-cli[tui]')",
+            err=True,
+        )
+        ctx.exit(1)
+    DockerDashboard().run()
+
+
+@click.group(cls=RichHelpGroup, invoke_without_command=True)
 @click.option(
     "-v",
     "--verbose",
@@ -18,9 +32,11 @@ from .core import Verbosity, check_docker, logger
 def docker(ctx, verbose):
     """Docker container and image management.
 
-    Manage Docker containers and images with subcommands for common operations.
+    Without a subcommand, opens a full-screen interactive dashboard
+    (lazydocker-style) for containers and images.
 
     Subcommands:
+      ui        Open the interactive dashboard (same as no subcommand)
       ps        List containers
       run       Run a command in a new container
       rm        Remove one or more containers
@@ -30,6 +46,7 @@ def docker(ctx, verbose):
       disk-used Show Docker disk usage information
 
     Examples:
+      h d               # Open the interactive dashboard
       h d ps            # List running containers
       h d run nginx     # Run an nginx container
       h d rm container  # Remove a container
@@ -42,24 +59,11 @@ def docker(ctx, verbose):
     parent_verbosity = ctx.obj.get("verbosity", 0) if hasattr(ctx, "obj") else 0
     verbosity_level = max(verbose, parent_verbosity)
 
-    # Initialize verbosity
+    # Initialize verbosity (also sets the log level)
     verbosity = Verbosity(verbosity=verbosity_level)
     ctx.obj["verbosity"] = verbosity
 
-    # Configure logger with verbosity level
-    logger.setLevel(
-        logging.DEBUG
-        if verbosity_level >= 3
-        else (
-            logging.INFO
-            if verbosity_level == 2
-            else logging.WARNING
-            if verbosity_level == 1
-            else logging.ERROR
-        )
-    )
-
-    logger.debug("Docker command group initialized with verbosity level: %s", verbosity_level)
+    logger.debug(f"Docker command group initialized with verbosity level: {verbosity_level}")
 
     verbosity.debug("Initializing Docker command group")
     if not check_docker(verbosity):
@@ -68,3 +72,13 @@ def docker(ctx, verbose):
             err=True,
         )
         ctx.exit(1)
+
+    if ctx.invoked_subcommand is None:
+        _launch_dashboard(ctx)
+
+
+@docker.command()
+@click.pass_context
+def ui(ctx):
+    """Open the full-screen interactive dashboard (lazydocker-style)."""
+    _launch_dashboard(ctx)

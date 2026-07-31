@@ -24,6 +24,7 @@ from .commands import (
     disk,
     journalctl,
     rsync,
+    tools,
 )
 
 
@@ -78,7 +79,7 @@ cli.add_command(kill.kill, name="kill")
 cli.add_command(disk.disk(), name="disk")
 cli.add_command(journalctl.journalctl(), name="journalctl")
 cli.add_command(rsync.rsync, name="rsync")
-cli.add_command(rsync.rsync, name="rsync")
+cli.add_command(tools.tools, name="tools")
 
 
 # Register the all command

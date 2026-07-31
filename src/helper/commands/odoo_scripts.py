@@ -59,9 +59,6 @@ def odoo(name):
 
     NAME optionally skips the menu and downloads that script directly.
 
-    The odoo-scripts repository is private: set GITHUB_TOKEN (or GH_TOKEN)
-    to a token that can read it.
-
     Example:
         $ h odoo
         $ h odoo list_users

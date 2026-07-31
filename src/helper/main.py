@@ -25,6 +25,7 @@ from .commands import (
     journalctl,
     rsync,
     tools,
+    odoo_scripts,
 )
 
 
@@ -80,6 +81,7 @@ cli.add_command(disk.disk(), name="disk")
 cli.add_command(journalctl.journalctl(), name="journalctl")
 cli.add_command(rsync.rsync, name="rsync")
 cli.add_command(tools.tools, name="tools")
+cli.add_command(odoo_scripts.odoo, name="odoo")
 
 
 # Register the all command

@@ -51,6 +51,7 @@ helper [command]
 | `disk`  | Show disk usage, mount, and list info | `helper disk usage`  |
 | `journalctl` | Show useful journalctl options and examples | `helper journalctl` |
 | `tools` | List other tools by the same author | `helper tools`       |
+| `odoo`  | Download click-odoo scripts to current dir | `helper odoo`   |
 | `all`   | Show all info                     | `helper all`         |
 
 Use `-v` for verbose output (e.g., `helper ip -v`).

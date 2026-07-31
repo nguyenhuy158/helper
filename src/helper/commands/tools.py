@@ -38,6 +38,12 @@ TOOLS = [
         "repo": "https://github.com/nguyenhuy158/docxlint",
     },
     {
+        "name": "odoo-scripts",
+        "description": "Collection of scripts runnable with click-odoo",
+        "install": "pip install click-odoo + clone repo",
+        "repo": "https://github.com/nguyenhuy158/odoo-scripts",
+    },
+    {
         "name": "graphql-compare",
         "description": "Compare GraphQL responses between environments (Docker app)",
         "install": "git clone + docker compose up",

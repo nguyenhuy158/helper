@@ -13,3 +13,6 @@
 [submodule "tools/graphql-compare"]
 	path = tools/graphql-compare
 	url = https://github.com/nguyenhuy158/graphql-compare.git
+[submodule "tools/odoo-scripts"]
+	path = tools/odoo-scripts
+	url = https://github.com/nguyenhuy158/odoo-scripts.git

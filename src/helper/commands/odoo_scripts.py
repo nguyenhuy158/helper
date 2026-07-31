@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.table import Table
 
 from ..gh import fetch as _request
+from ..rich_help import RichHelpCommand
 
 console = Console()
 
@@ -74,7 +75,7 @@ def _first_doc_line(script):
     return f"{size} B" if size < 1024 else f"{size / 1024:.1f} KB"
 
 
-@click.command()
+@click.command(cls=RichHelpCommand)
 @click.argument("name", required=False)
 @click.option(
     "--search",

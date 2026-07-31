@@ -6,6 +6,8 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
+from ..rich_help import RichHelpCommand
+
 console = Console()
 
 
@@ -19,7 +21,7 @@ def get_arch():
         return f"Error: {e}"
 
 
-@click.command()
+@click.command(cls=RichHelpCommand)
 def arch():
     """Display system architecture information.
 

@@ -4,6 +4,7 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
+from ..rich_help import RichHelpCommand
 from . import arch, internal_ip, public_ip, system_info
 
 console = Console()
@@ -19,7 +20,7 @@ def get_info():
     }
 
 
-@click.command(name="all")
+@click.command(name="all", cls=RichHelpCommand)
 def all_command():
     """Show all info"""
     info = get_info()

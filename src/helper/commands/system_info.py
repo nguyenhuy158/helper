@@ -8,6 +8,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from ..rich_help import RichHelpCommand
 from ..utils import format_bytes
 
 console = Console()
@@ -293,7 +294,7 @@ def get_info():
     return info
 
 
-@click.command()
+@click.command(cls=RichHelpCommand)
 def system_info():
     """Display system information including CPU, RAM, and disk usage"""
     info = get_info()

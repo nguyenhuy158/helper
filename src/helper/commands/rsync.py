@@ -5,8 +5,10 @@ import sys
 
 import click
 
+from ..rich_help import RichHelpCommand
 
-@click.command()
+
+@click.command(cls=RichHelpCommand)
 @click.argument("source")
 @click.argument("dest")
 def rsync(source, dest):

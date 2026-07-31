@@ -9,6 +9,8 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
+from ..rich_help import RichHelpCommand
+
 console = Console()
 
 
@@ -37,7 +39,7 @@ def get_internal_ip():
         return ip
 
 
-@click.command()
+@click.command(cls=RichHelpCommand)
 def internal_ip():
     """Display the local/internal IP address.
 

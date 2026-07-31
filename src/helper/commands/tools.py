@@ -7,6 +7,7 @@ from rich.console import Console
 from rich.table import Table
 
 from ..gh import fetch as _request
+from ..rich_help import RichHelpCommand
 
 console = Console()
 
@@ -72,7 +73,7 @@ def get_tools():
         return FALLBACK_TOOLS
 
 
-@click.command()
+@click.command(cls=RichHelpCommand)
 def tools():
     """List other tools by the same author.
 

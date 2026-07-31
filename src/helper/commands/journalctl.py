@@ -4,8 +4,10 @@ import platform
 
 import click
 
+from ..rich_help import RichHelpCommand
 
-@click.command(name="journalctl")
+
+@click.command(name="journalctl", cls=RichHelpCommand)
 def journalctl_cmd():
     """Display useful journalctl options and examples for Linux systemd logs."""
     system = platform.system().lower()

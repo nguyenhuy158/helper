@@ -6,6 +6,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from ..rich_help import RichHelpCommand
+
 console = Console()
 
 
@@ -44,7 +46,7 @@ def get_speed():
         return {"error": f"An unexpected error occurred: {e!s}"}
 
 
-@click.command()
+@click.command(cls=RichHelpCommand)
 @click.option("--simple", "-s", is_flag=True, help="Only show basic speed information")
 def speed(simple):
     """Test internet speed using speedtest.net

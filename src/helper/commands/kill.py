@@ -5,8 +5,10 @@ import subprocess
 import click
 import psutil
 
+from ..rich_help import RichHelpCommand
 
-@click.command()
+
+@click.command(cls=RichHelpCommand)
 @click.argument("target", required=False)
 @click.pass_context
 def kill(ctx, target):

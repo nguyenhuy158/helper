@@ -297,9 +297,7 @@ class DockerDashboard(App):
         )
 
     def _exec_and_refresh(self, args, label: str) -> None:
-        result = subprocess.run(
-            ["docker", *args], capture_output=True, text=True, check=False
-        )
+        result = subprocess.run(["docker", *args], capture_output=True, text=True, check=False)
         if result.returncode == 0:
             self.call_from_thread(self.notify, f"OK: {label}", timeout=3)
         else:

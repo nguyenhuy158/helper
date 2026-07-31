@@ -89,8 +89,45 @@ def render_group_help(
     formatter.write(capture.get())
 
 
+def render_command_help(ctx, formatter):
+    """Render the shared help screen for a leaf command into `formatter`."""
+    cmd = ctx.command
+    console = Console()
+    with console.capture() as capture:
+        usage = " ".join(cmd.collect_usage_pieces(ctx))
+        console.print(f"[bold]Usage:[/bold] {ctx.command_path} [dim]{escape(usage)}[/dim]")
+        help_text = (cmd.help or "").split("\f")[0].strip()
+        if help_text:
+            console.print(escape(help_text))
+        rows = [param.get_help_record(ctx) for param in cmd.get_params(ctx)]
+        rows = [row for row in rows if row]
+        if rows:
+            console.print("[dim]Options:[/dim]")
+            table = Table(show_header=False, pad_edge=False, box=None)
+            table.add_column("Option", style="bold cyan", no_wrap=True)
+            table.add_column("Description", style="")
+            for flags, description in rows:
+                table.add_row(escape(flags), escape(description or ""))
+            console.print(table)
+    formatter.write(capture.get())
+
+
+class RichHelpCommand(click.Command):
+    """Click command whose --help uses the shared rich help screen."""
+
+    def format_help(self, ctx, formatter):
+        render_command_help(ctx, formatter)
+
+
 class RichHelpGroup(click.Group):
-    """Click group whose --help uses the shared rich help screen."""
+    """Click group whose --help uses the shared rich help screen.
+
+    Subcommands declared via @group.command() / @group.group() pick up the
+    rich help classes automatically.
+    """
+
+    command_class = RichHelpCommand
+    group_class = type
 
     def format_help(self, ctx, formatter):
         render_group_help(ctx, formatter)

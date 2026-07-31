@@ -39,9 +39,9 @@ def get_speed():
         }
 
     except speedtest.SpeedtestException as e:
-        return {"error": f"Error running speed test: {str(e)}"}
+        return {"error": f"Error running speed test: {e!s}"}
     except Exception as e:
-        return {"error": f"An unexpected error occurred: {str(e)}"}
+        return {"error": f"An unexpected error occurred: {e!s}"}
 
 
 @click.command()

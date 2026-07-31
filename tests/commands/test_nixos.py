@@ -6,7 +6,7 @@ logic and error handling for non-NixOS systems.
 """
 
 import subprocess
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from helper.commands.nixos import check_nixos, get_nixos_version
 

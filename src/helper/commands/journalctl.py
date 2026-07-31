@@ -1,6 +1,7 @@
 """Journalctl log commands."""
 
 import platform
+
 import click
 
 
@@ -42,4 +43,3 @@ def journalctl_cmd():
 def journalctl():
     """Journalctl command group."""
     return journalctl_cmd
-

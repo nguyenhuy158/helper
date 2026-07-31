@@ -3,7 +3,8 @@
 import os
 
 import click
-from ..env_manager import set_env, load_env, CONFIG_DIR, ENV_FILE
+
+from ..env_manager import CONFIG_DIR, ENV_FILE, load_env, set_env
 
 
 @click.group(name="env", help="Manage environment variables.")
@@ -20,7 +21,7 @@ def list_env_cmd():
         return
 
     # Find the maximum key length for alignment
-    max_key_len = max(len(str(k)) for k in env_vars.keys())
+    max_key_len = max(len(str(k)) for k in env_vars)
 
     # Print header
     click.echo("Environment Variables:")
@@ -96,5 +97,4 @@ def save_env(env_vars):
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
     with open(ENV_FILE, "w", encoding="utf-8") as f:
-        for key, value in env_vars.items():
-            f.write(f'{key}="{value}"\n')
+        f.writelines(f'{key}="{value}"\n' for key, value in env_vars.items())

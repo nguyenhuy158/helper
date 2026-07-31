@@ -105,10 +105,10 @@ def odoo(name, search, dest_dir):
             )
         else:
             console.print(f"[red]GitHub API error: HTTP {e.code}[/red]")
-        raise SystemExit(1)
+        raise SystemExit(1) from e
     except urllib.error.URLError as e:
         console.print(f"[red]Network error: {e.reason}[/red]")
-        raise SystemExit(1)
+        raise SystemExit(1) from e
 
     if not scripts:
         console.print("No scripts found in the repository.")
@@ -171,9 +171,7 @@ def odoo(name, search, dest_dir):
     os.makedirs(dest_dir, exist_ok=True)
 
     target = os.path.join(dest_dir, selected["name"])
-    if os.path.exists(target) and not click.confirm(
-        f"{target} already exists. Overwrite?"
-    ):
+    if os.path.exists(target) and not click.confirm(f"{target} already exists. Overwrite?"):
         return
 
     dest = download_script(selected, dest_dir=dest_dir)

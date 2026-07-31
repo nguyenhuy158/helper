@@ -1,4 +1,4 @@
-.PHONY: help run build patch minor major pub test lint clean
+.PHONY: help run build patch minor major pub test lint fmt clean
 
 VERSION := $(shell cat VERSION)
 
@@ -11,7 +11,8 @@ help:
 	@echo "  make major - Increment major version and tag"
 	@echo "  make pub   - Build and publish to PyPI"
 	@echo "  make test  - Run tests"
-	@echo "  make lint  - Run linters"
+	@echo "  make lint  - Run ruff check + format check"
+	@echo "  make fmt   - Auto-format code with ruff"
 	@echo "  make clean - Clean build artifacts"
 
 run:
@@ -50,6 +51,11 @@ test:
 
 lint:
 	ruff check .
+	ruff format --check .
+
+fmt:
+	ruff format .
+	ruff check --fix .
 
 clean:
 	rm -rf dist/ build/ *.egg-info/ src/*.egg-info/

@@ -1,17 +1,17 @@
 """Run predefined command snippets."""
 
 import os
-import sys
 import subprocess
+import sys
 
 import click
 
 from ..snippets import (
     add_snippet,
-    remove_snippet,
-    list_snippets,
     get_snippet_command,
+    list_snippets,
     load_snippets,
+    remove_snippet,
 )
 
 
@@ -81,7 +81,7 @@ def exec_cmd(snippet, args, force):
     snippet_name = _get_snippet_by_index_or_name(snippet, snippets_list)
     if not snippet_name:
         click.echo(
-            f"Error: Snippet '{snippet}' not found. " "Use 'h run list' to see available snippets.",
+            f"Error: Snippet '{snippet}' not found. Use 'h run list' to see available snippets.",
             err=True,
         )
         return
@@ -233,7 +233,7 @@ def edit_cmd(editor):
         subprocess.run([editor, str(SNIPPETS_FILE)], check=True)
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         click.echo(f"Error opening editor: {e}", err=True)
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 # exec_cmd has been removed as its functionality is now handled by the main run command

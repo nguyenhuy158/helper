@@ -1,9 +1,10 @@
 """Development file watcher for auto-reinstalling the package."""
 
-import time
 import subprocess
-from watchdog.observers import Observer
+import time
+
 from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 
 class ChangeHandler(FileSystemEventHandler):
@@ -12,9 +13,7 @@ class ChangeHandler(FileSystemEventHandler):
     def on_modified(self, event):
         """Handle file modification events."""
         src_path = str(event.src_path)
-        if src_path.endswith(".py") and not any(
-            x in src_path for x in ["__pycache__", ".git"]
-        ):
+        if src_path.endswith(".py") and not any(x in src_path for x in ["__pycache__", ".git"]):
             print("\nDetected changes. Reinstalling package...")
             try:
                 subprocess.run(["pip", "install", "-e", "."], check=True)

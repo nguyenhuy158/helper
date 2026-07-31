@@ -7,7 +7,7 @@ Tests cover various scenarios like missing environments and path resolution.
 
 from unittest.mock import patch
 
-from helper.commands.venv import find_virtualenv, source_virtualenv, deactivate_virtualenv
+from helper.commands.venv import deactivate_virtualenv, find_virtualenv, source_virtualenv
 
 
 class TestFindVirtualenv:

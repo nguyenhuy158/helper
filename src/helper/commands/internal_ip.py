@@ -1,9 +1,10 @@
 """Internal IP address commands."""
 
 import platform
-import socket
 import shutil
+import socket
 import subprocess
+
 import click
 from rich.console import Console
 from rich.panel import Panel

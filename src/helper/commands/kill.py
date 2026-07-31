@@ -43,9 +43,7 @@ def kill(ctx, target):
                                 f"(PID: {pid}) listening on port {port}."
                             )
                         except psutil.AccessDenied:
-                            click.echo(
-                                f"Access denied: cannot kill process {pid} " f"on port {port}."
-                            )
+                            click.echo(f"Access denied: cannot kill process {pid} on port {port}.")
             else:
                 click.echo(f"No process found listening on port {port}.")
         except FileNotFoundError:

@@ -77,7 +77,7 @@ def get_container_ports(container_id: str, verbosity: Verbosity) -> List[Dict]:
                 "docker",
                 "inspect",
                 "--format",
-                "{{range $p, $conf := .NetworkSettings.Ports}}"  # noqa: E501
+                "{{range $p, $conf := .NetworkSettings.Ports}}"
                 "{{range $h, $hosts := $conf}}"
                 "{{$p}}|{{$hosts.HostIp}}|{{$hosts.HostPort}};"
                 "{{end}}{{end}}",
@@ -154,7 +154,7 @@ def check_docker(verbosity: Verbosity) -> bool:
         return False
     except Exception as e:
         verbosity.error(
-            f"Unexpected error checking Docker: {str(e)}",
+            f"Unexpected error checking Docker: {e!s}",
             exc_info=verbosity.verbosity >= 3,
         )
         return False
@@ -225,7 +225,9 @@ def docker(ctx, verbose):
         else (
             logging.INFO
             if verbosity_level == 2
-            else logging.WARNING if verbosity_level == 1 else logging.ERROR
+            else logging.WARNING
+            if verbosity_level == 1
+            else logging.ERROR
         )
     )
 
@@ -313,7 +315,7 @@ def ps(ctx, all_containers, output_format):  # pylint: disable=redefined-builtin
                                 )
                             )
                     except Exception as e:
-                        verbosity.debug(f"Error formatting table: {str(e)}")
+                        verbosity.debug(f"Error formatting table: {e!s}")
                         # Fall back to raw output if processing fails
                         click.echo(result.stdout)
                 else:
@@ -323,11 +325,11 @@ def ps(ctx, all_containers, output_format):  # pylint: disable=redefined-builtin
             verbosity.error(error_msg)
             click.echo(error_msg, err=True)
     except subprocess.CalledProcessError as e:
-        error_msg = f"Command failed: {str(e)}"
+        error_msg = f"Command failed: {e!s}"
         verbosity.error(error_msg)
         click.echo(error_msg, err=True)
     except Exception as e:
-        error_msg = f"Unexpected error: {str(e)}"
+        error_msg = f"Unexpected error: {e!s}"
         verbosity.error(error_msg)
         click.echo(error_msg, err=True)
 
@@ -394,7 +396,7 @@ def run(ctx, image, name, port, detach, env, volume):
             ctx.exit(1)
 
     except Exception as e:
-        error_msg = f"Failed to run container: {str(e)}"
+        error_msg = f"Failed to run container: {e!s}"
         verbosity.error(error_msg, exc_info=verbosity.verbosity >= 3)
         click.echo(error_msg, err=True)
         ctx.exit(1)
@@ -456,7 +458,7 @@ def rm(ctx, containers, force, volumes):
             ctx.exit(1)
 
     except Exception as e:
-        error_msg = f"Failed to remove containers: {str(e)}"
+        error_msg = f"Failed to remove containers: {e!s}"
         verbosity.error(error_msg, exc_info=verbosity.verbosity >= 3)
         click.echo(error_msg, err=True)
         ctx.exit(1)
@@ -642,7 +644,7 @@ def url(ctx, show_all, http_only):
             )
 
     except Exception as e:
-        error_msg = f"Error in url command: {str(e)}"
+        error_msg = f"Error in url command: {e!s}"
         verbosity.error(error_msg, exc_info=verbosity.verbosity >= 3)
         click.echo(error_msg, err=True)
 
@@ -710,7 +712,7 @@ def rmi(ctx, image, all_tags, force, no_prune):
 
             except Exception as e:
                 verbosity.error(
-                    f"Error finding tags for {img}: {str(e)}",
+                    f"Error finding tags for {img}: {e!s}",
                     exc_info=verbosity.verbosity >= 3,
                 )
                 continue
@@ -744,7 +746,7 @@ def rmi(ctx, image, all_tags, force, no_prune):
             ctx.exit(1)
 
     except Exception as e:
-        error_msg = f"Failed to remove images: {str(e)}"
+        error_msg = f"Failed to remove images: {e!s}"
         verbosity.error(error_msg, exc_info=verbosity.verbosity >= 3)
         click.echo(error_msg, err=True)
         ctx.exit(1)
@@ -797,7 +799,7 @@ def clean(ctx, dry_run):
         verbosity.error(f"Failed to list or remove dangling images: {e.stderr}")
         click.echo("Error: Failed to remove dangling images", err=True)
     except Exception as e:
-        verbosity.error(f"Unexpected error removing dangling images: {str(e)}")
+        verbosity.error(f"Unexpected error removing dangling images: {e!s}")
         click.echo("Error: Unexpected error during cleanup", err=True)
 
     # Step 2: Run system prune
@@ -826,7 +828,7 @@ def clean(ctx, dry_run):
                 verbosity.error(f"System prune failed: {prune_result.stderr}")
                 click.echo("Error: System prune failed", err=True)
     except Exception as e:
-        verbosity.error(f"Unexpected error during system prune: {str(e)}")
+        verbosity.error(f"Unexpected error during system prune: {e!s}")
         click.echo("Error: Unexpected error during system prune", err=True)
 
     if dry_run:
@@ -859,12 +861,12 @@ def disk_used(ctx):
             ctx.exit(1)
 
     except subprocess.CalledProcessError as e:
-        error_msg = f"Command failed: {str(e)}"
+        error_msg = f"Command failed: {e!s}"
         verbosity.error(error_msg)
         click.echo(error_msg, err=True)
         ctx.exit(1)
     except Exception as e:
-        error_msg = f"Unexpected error: {str(e)}"
+        error_msg = f"Unexpected error: {e!s}"
         verbosity.error(error_msg, exc_info=verbosity.verbosity >= 3)
         click.echo(error_msg, err=True)
         ctx.exit(1)

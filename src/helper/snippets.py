@@ -21,7 +21,7 @@ def ensure_snippets_file() -> None:
 def load_snippets() -> Dict[str, str]:
     """Load all snippets from the snippets file."""
     ensure_snippets_file()
-    with open(SNIPPETS_FILE, "r", encoding="utf-8") as f:
+    with open(SNIPPETS_FILE, encoding="utf-8") as f:
         data = json.load(f)
     return data.get("snippets", {})
 

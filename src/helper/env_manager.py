@@ -34,7 +34,7 @@ def load_env() -> Dict[str, str]:
 
     # Load existing .env file if it exists
     if ENV_FILE.exists():
-        with open(ENV_FILE, "r", encoding="utf-8") as f:
+        with open(ENV_FILE, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith("#"):
@@ -62,8 +62,7 @@ def save_env(env_vars: Dict[str, str]) -> None:
     ensure_config_dir()
 
     with open(ENV_FILE, "w", encoding="utf-8") as f:
-        for key, value in env_vars.items():
-            f.write(f'{key}="{value}"\n')
+        f.writelines(f'{key}="{value}"\n' for key, value in env_vars.items())
 
 
 def get_env(key: str, default: Optional[str] = None) -> Optional[str]:

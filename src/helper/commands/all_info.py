@@ -2,7 +2,8 @@
 
 from rich.console import Console
 from rich.panel import Panel
-from . import internal_ip, public_ip, arch, system_info
+
+from . import arch, internal_ip, public_ip, system_info
 
 console = Console()
 
@@ -82,7 +83,9 @@ def register_all_command(cli):
                 table.add_row("Usage", si["memory"]["usage"])
                 console.print(Panel(table, title="Memory Information", border_style="yellow"))
             else:
-                console.print(Panel(si["memory"], title="Memory Information", border_style="yellow"))
+                console.print(
+                    Panel(si["memory"], title="Memory Information", border_style="yellow")
+                )
 
             # Disk Information
             console.print(Panel(si["disks"], title="Disk Information", border_style="cyan"))

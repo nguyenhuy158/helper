@@ -51,7 +51,6 @@ def parse_windows_disk_info(disks_output):
 @click.pass_context
 def disk_cmd(ctx):
     """Disk management commands."""
-    pass
 
 
 @disk_cmd.command(name="usage")
@@ -132,4 +131,3 @@ def get_list():
 def disk():
     """Disk command group."""
     return disk_cmd
-

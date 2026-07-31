@@ -5,29 +5,28 @@ import logging
 import click
 
 from . import __version__
-from .env_manager import load_env
 from .commands import (
-    internal_ip,
-    public_ip,
+    all_info,
     arch,
-    nixos,
+    disk,
     docker,
+    env_cmd,
+    file,
+    internal_ip,
+    journalctl,
+    kill,
+    nixos,
+    odoo_scripts,
+    public_ip,
+    rsync,
+    run_cmd,
     speed,
     system_info,
-    venv,
-    file,
-    verbosity,
-    all_info,
-    env_cmd,
-    run_cmd,
-    kill,
-    disk,
-    journalctl,
-    rsync,
     tools,
-    odoo_scripts,
+    venv,
+    verbosity,
 )
-
+from .env_manager import load_env
 
 # Import verbosity classes from the verbosity module
 VerbosityCommand = verbosity.VerbosityCommand
@@ -44,15 +43,13 @@ VerbosityGroup = verbosity.VerbosityGroup
 )
 @click.version_option(__version__, "-V", "--version", message="%(prog)s version %(version)s")
 def cli():
-    """Helper CLI - quick system info (v{})
+    """Helper CLI - quick system info.
 
     You can use 'h' as a shortcut for 'helper' command.
     Example: h docker ps
 
     For detailed help on a specific command, use: helper <command> --help
-    """.format(
-        __version__
-    )
+    """
     # Initialize environment variables
     load_env()
 

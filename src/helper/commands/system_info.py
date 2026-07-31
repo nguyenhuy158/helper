@@ -5,8 +5,8 @@ import subprocess
 
 import click
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
+from rich.table import Table
 
 from ..utils import format_bytes
 
@@ -70,7 +70,7 @@ def parse_vm_stat(output):
         f"(Apps: {format_bytes(app_memory)}, Wired: {format_bytes(wired_memory)})\n"
         f"Free:  {format_bytes(free_memory)}\n"
         f"Cached: {format_bytes(cached_files)}\n"
-        f"Usage: {used_memory/total_memory*100:.1f}%"
+        f"Usage: {used_memory / total_memory * 100:.1f}%"
     )
 
 
@@ -137,8 +137,8 @@ def get_os_specific_info():
     """Get OS-specific system information"""
     system = platform.system().lower()
 
-    if system == "darwin":  # macOS
-        return {
+    commands = {
+        "darwin": {
             "cpu": "sysctl -n machdep.cpu.brand_string",
             "cpu_cores": "sysctl -n hw.ncpu",
             "memory": "vm_stat",
@@ -146,9 +146,8 @@ def get_os_specific_info():
             "os_version": "sw_vers",
             "hostname": "hostname",
             "uptime": "uptime",
-        }
-    elif system == "linux":
-        return {
+        },
+        "linux": {
             "cpu": 'cat /proc/cpuinfo | grep "model name" | head -n 1 | cut -d":" -f2',
             "cpu_cores": "nproc",
             "memory": "free -h",
@@ -156,9 +155,8 @@ def get_os_specific_info():
             "os_version": "cat /etc/os-release",
             "hostname": "hostname",
             "uptime": "uptime",
-        }
-    elif system == "windows":
-        return {
+        },
+        "windows": {
             "cpu": "wmic cpu get name",
             "cpu_cores": "wmic cpu get NumberOfCores",
             "memory": "wmic OS get TotalVisibleMemorySize,FreePhysicalMemory /Value",
@@ -166,9 +164,9 @@ def get_os_specific_info():
             "os_version": 'systeminfo | findstr /B /C:"OS Name" /C:"OS Version"',
             "hostname": "hostname",
             "uptime": "wmic os get lastbootuptime",
-        }
-    else:
-        return None
+        },
+    }
+    return commands.get(system)
 
 
 def format_uptime(uptime_str, system):
@@ -237,7 +235,7 @@ def get_info():
                     "total": format_bytes(total),
                     "used": format_bytes(used),
                     "free": format_bytes(free),
-                    "usage": f"{used/total*100:.1f}%" if total > 0 else "0%",
+                    "usage": f"{used / total * 100:.1f}%" if total > 0 else "0%",
                 }
     elif system == "windows":
         mem_info = run_command("wmic OS get TotalVisibleMemorySize,FreePhysicalMemory /Value")
@@ -253,7 +251,7 @@ def get_info():
                 "total": format_bytes(total),
                 "used": format_bytes(used),
                 "free": format_bytes(free),
-                "usage": f"{used/total*100:.1f}%" if total > 0 else "0%",
+                "usage": f"{used / total * 100:.1f}%" if total > 0 else "0%",
             }
         else:
             info["memory"] = mem_info

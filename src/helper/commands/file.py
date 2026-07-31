@@ -2,8 +2,9 @@
 
 import datetime
 import os
+from typing import Callable, List, Optional, Tuple
+
 import click
-from typing import List, Optional, Tuple, Callable
 
 
 def get_sorted_files(
@@ -159,7 +160,7 @@ def newest_files(ctx: click.Context, count: int) -> None:
             click.echo(f"{i}. {format_file_info(entry, show_size, show_modified)}")
 
     except Exception as e:
-        raise click.ClickException(str(e))
+        raise click.ClickException(str(e)) from e
 
 
 @file_cmd.command(name="oldest")
@@ -195,7 +196,7 @@ def oldest_files(ctx: click.Context, count: int) -> None:
             click.echo(f"{i}. {format_file_info(entry, show_size, show_modified)}")
 
     except Exception as e:
-        raise click.ClickException(str(e))
+        raise click.ClickException(str(e)) from e
 
 
 # Add this to register the command group

@@ -15,7 +15,7 @@ def check_nixos():
             return "NixOS" in f.read()
     except FileNotFoundError:
         return False
-    except (IOError, PermissionError) as e:
+    except (OSError, PermissionError) as e:
         click.echo(f"Warning: Could not check if running on NixOS: {e}", err=True)
         return False
 
@@ -71,7 +71,7 @@ def search(package):
         else:
             click.echo(f"Error searching for package: {result.stderr}", err=True)
     except subprocess.SubprocessError as e:
-        click.echo(f"Error: {str(e)}", err=True)
+        click.echo(f"Error: {e!s}", err=True)
 
 
 @nixos.command()
@@ -106,4 +106,4 @@ def clean(force):
     except subprocess.CalledProcessError as e:
         click.echo(f"Error during cleanup: {e}", err=True)
     except subprocess.SubprocessError as e:
-        click.echo(f"Subprocess error: {str(e)}", err=True)
+        click.echo(f"Subprocess error: {e!s}", err=True)

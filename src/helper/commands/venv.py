@@ -130,4 +130,4 @@ s = source
 d = deactivate
 
 # Add the commands to the module
-__all__ = ["venv", "source", "deactivate", "s", "d"]
+__all__ = ["d", "deactivate", "s", "source", "venv"]

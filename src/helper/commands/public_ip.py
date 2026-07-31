@@ -1,6 +1,7 @@
 """Public IP address commands."""
 
 import subprocess
+
 import click
 from rich.console import Console
 from rich.panel import Panel

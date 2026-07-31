@@ -8,7 +8,7 @@
   {
     "name": "pgslim",
     "description": "Reduce PostgreSQL dump size by nullifying large bytea/text columns",
-    "install": "pip install pgslim",
+    "install": "uvx pgslim",
     "repo": "https://github.com/nguyenhuy158/pgslim"
   },
   {

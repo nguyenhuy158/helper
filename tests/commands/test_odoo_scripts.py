@@ -70,12 +70,42 @@ class TestOdooCommand:
         runner, cli = cli_app
 
         with runner.isolated_filesystem():
-            result = runner.invoke(cli, ["odoo"], input="2\n")
+            result = runner.invoke(cli, ["odoo"], input="2\n\n")
 
         assert result.exit_code == 0
         mock_download.assert_called_once()
         assert mock_download.call_args[0][0]["name"] == "record_counts.py"
+        assert mock_download.call_args[1]["dest_dir"] == "."
         assert "click-odoo" in result.output
+
+    @patch("helper.commands.odoo_scripts.download_script")
+    @patch("helper.commands.odoo_scripts.list_scripts")
+    def test_save_to_custom_directory(self, mock_list, mock_download, cli_app):
+        """Test that answering the directory prompt saves into that directory."""
+        mock_list.return_value = [{"name": "list_users.py", "url": "u", "size": 1}]
+        mock_download.return_value = "sub/list_users.py"
+        runner, cli = cli_app
+
+        with runner.isolated_filesystem():
+            result = runner.invoke(cli, ["odoo"], input="1\nsub\n")
+
+        assert result.exit_code == 0
+        assert mock_download.call_args[1]["dest_dir"] == "sub"
+
+    @patch("helper.commands.odoo_scripts.download_script")
+    @patch("helper.commands.odoo_scripts.list_scripts")
+    def test_dir_option_skips_prompt(self, mock_list, mock_download, cli_app):
+        """Test that --dir saves there without prompting for a directory."""
+        mock_list.return_value = [{"name": "list_users.py", "url": "u", "size": 1}]
+        mock_download.return_value = "sub/list_users.py"
+        runner, cli = cli_app
+
+        with runner.isolated_filesystem():
+            result = runner.invoke(cli, ["odoo", "list_users", "--dir", "sub"])
+
+        assert result.exit_code == 0
+        assert "Save to directory" not in result.output
+        assert mock_download.call_args[1]["dest_dir"] == "sub"
 
     @patch("helper.commands.odoo_scripts.list_scripts")
     def test_cancel_selection(self, mock_list, cli_app):
@@ -96,7 +126,7 @@ class TestOdooCommand:
         runner, cli = cli_app
 
         with runner.isolated_filesystem():
-            result = runner.invoke(cli, ["odoo", "list_users"])
+            result = runner.invoke(cli, ["odoo", "list_users"], input="\n")
 
         assert result.exit_code == 0
         mock_download.assert_called_once()

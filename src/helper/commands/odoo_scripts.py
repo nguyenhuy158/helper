@@ -50,18 +50,28 @@ def _first_doc_line(script):
 
 @click.command()
 @click.argument("name", required=False)
-def odoo(name):
+@click.option(
+    "--dir",
+    "-d",
+    "dest_dir",
+    default=None,
+    type=click.Path(file_okay=False),
+    help="Directory to save the script into (prompted if omitted, default: current dir).",
+)
+def odoo(name, dest_dir):
     """Browse and download click-odoo scripts.
 
     Lists the scripts available in the odoo-scripts repository,
-    downloads the selected one to the current directory, then you
-    run it yourself with click-odoo.
+    downloads the selected one, then you run it yourself with
+    click-odoo. After selecting, you are asked where to save the
+    file (default: current directory).
 
     NAME optionally skips the menu and downloads that script directly.
 
     Example:
         $ h odoo
         $ h odoo list_users
+        $ h odoo list_users --dir ~/scripts
     """
     try:
         scripts = list_scripts()
@@ -107,12 +117,22 @@ def odoo(name):
             return
         selected = scripts[choice - 1]
 
-    if os.path.exists(selected["name"]) and not click.confirm(
-        f"{selected['name']} already exists here. Overwrite?"
+    if dest_dir is None:
+        dest_dir = click.prompt(
+            "Save to directory",
+            default=".",
+            type=click.Path(file_okay=False),
+        )
+    dest_dir = os.path.expanduser(dest_dir)
+    os.makedirs(dest_dir, exist_ok=True)
+
+    target = os.path.join(dest_dir, selected["name"])
+    if os.path.exists(target) and not click.confirm(
+        f"{target} already exists. Overwrite?"
     ):
         return
 
-    dest = download_script(selected)
+    dest = download_script(selected, dest_dir=dest_dir)
     console.print(f"[green]Saved[/green] {dest}")
     console.print("Run it with:")
-    console.print(f"  [bold]click-odoo -c odoo.conf -d <db> {selected['name']}[/bold]")
+    console.print(f"  [bold]click-odoo -c odoo.conf -d <db> {dest}[/bold]")

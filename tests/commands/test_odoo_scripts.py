@@ -220,3 +220,24 @@ class TestOdooCommand:
 
         assert result.exit_code == 0
         assert "table: login | name | email" in result.output
+
+
+class TestTuiPicker:
+    """Test cases for the optional Textual picker integration."""
+
+    def test_picker_import_is_lazy(self):
+        """Importing odoo_scripts must not import textual."""
+        import sys
+
+        import helper.commands.odoo_scripts  # noqa: F401
+
+        assert "helper.commands.odoo_picker" not in sys.modules
+
+    def test_non_tty_falls_back_to_menu(self):
+        """Without a tty the TUI is skipped so the numbered menu runs."""
+        from helper.commands.odoo_scripts import _pick_script_tui
+
+        picked, handled = _pick_script_tui([], {}, "")
+
+        assert handled is False
+        assert picked is None

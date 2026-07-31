@@ -2,6 +2,7 @@
 
 import json
 import os
+import sys
 import urllib.error
 
 import click
@@ -75,6 +76,22 @@ def _first_doc_line(script):
     return f"{size} B" if size < 1024 else f"{size / 1024:.1f} KB"
 
 
+def _pick_script_tui(scripts, catalog, initial_filter):
+    """Try the full-screen Textual picker.
+
+    Returns (selection, handled). handled is False when textual is not
+    installed or the session is not interactive — caller falls back to
+    the plain numbered menu. selection is None when the user cancelled.
+    """
+    if not (sys.stdin.isatty() and sys.stdout.isatty()):
+        return None, False
+    try:
+        from .odoo_picker import ScriptPicker
+    except ImportError:
+        return None, False
+    return ScriptPicker(scripts, catalog, initial_filter).run(), True
+
+
 @click.command(cls=RichHelpCommand)
 @click.argument("name", required=False)
 @click.option(
@@ -95,10 +112,11 @@ def _first_doc_line(script):
 def odoo(name, search, dest_dir):
     """Browse and download click-odoo scripts.
 
-    Lists the scripts available in the odoo-scripts repository with
-    category and description, downloads the selected one, then you
-    run it yourself with click-odoo. After selecting, you are asked
-    where to save the file (default: current directory).
+    Opens a full-screen interactive picker (live filter + code preview)
+    when the optional 'textual' package is installed; otherwise shows a
+    plain numbered menu. Downloads the selected script, then you run it
+    yourself with click-odoo. After selecting, you are asked where to
+    save the file (default: current directory).
 
     NAME downloads that script directly when it matches exactly;
     otherwise it filters the menu like --search does.
@@ -137,6 +155,13 @@ def odoo(name, search, dest_dir):
 
     if selected is None:
         term = (search or name or "").lower()
+        picked, handled = _pick_script_tui(scripts, catalog, term)
+        if handled:
+            if picked is None:
+                return
+            selected = picked
+
+    if selected is None:
         if term:
             scripts = [
                 s

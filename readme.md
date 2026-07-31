@@ -6,8 +6,22 @@ A simple command-line tool to show system info (IP, CPU arch, etc.) and the comm
 
 ### 🚀 Install
 
+With [uv](https://docs.astral.sh/uv/) (recommended):
+
 ```bash
-pip install helper
+uv tool install helper-cli
+```
+
+Or run without installing:
+
+```bash
+uvx --from helper-cli helper ip
+```
+
+With pip:
+
+```bash
+pip install helper-cli
 ```
 
 ---
@@ -77,8 +91,16 @@ print(all_info)
 
 ### 🔄 Upgrade
 
+With uv:
+
 ```bash
-pip install --upgrade helper
+uv tool upgrade helper-cli
+```
+
+With pip:
+
+```bash
+pip install --upgrade helper-cli
 ```
 
 ---
@@ -87,10 +109,30 @@ pip install --upgrade helper
 
 Pull requests are welcome!
 
-Before submitting a PR, ensure your code passes pylint checks and tests:
+Set up a development environment with uv:
+
+```bash
+uv venv
+uv pip install -e ".[dev]"
+```
+
+Or with pip:
+
+```bash
+pip install -e ".[dev]"
+```
+
+Before submitting a PR, ensure your code passes lint checks and tests:
 ```bash
 make lint
 make test
+```
+
+With uv you can also run them directly:
+
+```bash
+uv run --extra dev ruff check .
+uv run --extra dev pytest
 ```
 
 #### Testing

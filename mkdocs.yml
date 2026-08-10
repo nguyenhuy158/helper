@@ -8,6 +8,9 @@ repo_url: https://github.com/nguyenhuy158/helper
 theme:
     # name: mkdocs
     name: material
+    font:
+        text: Be Vietnam Pro
+        code: Roboto Mono
     highlightjs: true
     hljs_languages:
         - yaml
